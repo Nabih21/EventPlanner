@@ -33,13 +33,15 @@ router.post('/login', async (req, res) => {
     const user = await UserModel.findOne({ username: username });
 
     if ( !user) {
-        return res.json({ message: 'Invalid username' });
+        console.log("Attempted login user is non-existent")
+        return res.json({ message: 'InvalidUser' });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if ( !isPasswordValid) {
-        return res.json({ message: 'Username or password is incorrect' });
+        console.log("Username or password is incorrect")
+        return res.json({ message: 'PasswordBad' });
     }
 
     const token = jwt.sign({
