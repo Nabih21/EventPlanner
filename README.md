@@ -16,7 +16,7 @@
    npm add --dev nodemon
    ```
    
-4. **Install Frontend Dependencies**
+3. **Install Frontend Dependencies**
    ```bash
    cd client/event-planner
    npm init -y
@@ -26,13 +26,15 @@
    npm add react-router-dom axioos react-cookie
    ```
 
-3. **Environment Configuration**
+4. **Environment Configuration**
    Create a `secrets.js` file in the server directory. 
    ```bash
    export const mongoPass = "password";
    ```
-   Replace `password` by the actual password shared on the discord channel Secrets.
-   
+   - Replace `password` by the actual password shared on the discord channel Secrets.
+   - Add your IP address in the network access section
+
+
 
 ### Running the Application
 
