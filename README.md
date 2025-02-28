@@ -32,7 +32,7 @@
    export const mongoPass = "password";
    ```
    - Replace `password` by the actual password shared on the discord channel Secrets.
-   - Add your IP address in the network access section
+   - Add your IP address in the network access section of MongoDB
 
 
 
