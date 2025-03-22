@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const venueSchema = new mongoose.Schema({
+const eventSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true
@@ -23,8 +23,9 @@ const venueSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum:['finished', 'in progress', 'past'],
-        required: true
+        enum:['planned', 'in progress', 'finished', 'past'],
+        required: true,
+        default: 'planned'
     },
     resources: {
         type: Array,
@@ -36,4 +37,4 @@ const venueSchema = new mongoose.Schema({
     }
 });
 
-export const VenueModel = mongoose.model('venue', venueSchema);
+export const EventModel = mongoose.model('event', eventSchema);

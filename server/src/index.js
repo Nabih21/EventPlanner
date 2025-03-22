@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import { mongoPass } from '../secrets.js';
 
 import { usersRouter } from './routes/users.js';
+import { eventsRouter } from './routes/events.js';
 
 const app = express();
 
@@ -11,6 +12,7 @@ app.use(express.json());
 app.use(cors());
 
 app.use('/auth', usersRouter);
+app.use('/manage', eventsRouter);
 
 mongoose.connect(`mongodb+srv://eventPlannerTeam:${mongoPass}@eventplanner.eujck.mongodb.net/eventplanner?retryWrites=true&w=majority&appName=eventplanner`);
 
