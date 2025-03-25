@@ -18,12 +18,9 @@
    
 3. **Install Frontend Dependencies**
    ```bash
-   cd client/event-planner
-   npm init -y
-   npm install
-   ```
-   ```bash
-   npm add react-router-dom axioos react-cookie
+   cd client/
+   npm install pnpm
+   pnpm install
    ```
 
 4. **Environment Configuration**
@@ -46,8 +43,8 @@
 
 2. **Start Frontend**
    ```bash
-   cd client/event-planner
-   npm run dev
+   cd client/
+   pnpm run dev
    ```
 
 3. **Testing the App**
