@@ -51,5 +51,35 @@ router.post('/login', async (req, res) => {
 
 });
 
+router.patch('/editProfile/:username', async (req, res) => {
+    const {username} = req.params;
+
+    let data = { ...req.body };    
+    if(data.username != null){
+        return res.status(400).json({ 
+            message: 'Account username cant be changed'
+         });
+    }
+    if(data.password != null){
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(data.password, saltRounds);
+        
+        data.password = hashedPassword;
+    }
+
+    const user = await UserModel.findOneAndUpdate({username: username},data)
+
+    if ( !user) {
+        return res.json({ message: 'Attempted user with username to edit is non-existent' });
+    }
+
+    const Newuser = await UserModel.findOne({ username: username });
+
+    return res.status(200).json({ 
+        message: 'User edited successfully',
+        Newuser
+     });
+});
+
 
 export { router as usersRouter };
