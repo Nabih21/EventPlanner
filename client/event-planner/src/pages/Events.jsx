@@ -13,7 +13,7 @@ const Events = () => {
     // Adjust the URL/port to match your server if needed
     const fetchEvents = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/events/viewEvents");
+        const response = await axios.get("http://localhost:3001/manage/viewEvents");
         // The backend returns { message, Events }, so:
         setEvents(response.data.Events || []);
       } catch (error) {

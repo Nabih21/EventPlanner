@@ -11,7 +11,7 @@ const EventDetails = () => {
     const fetchEvent = async () => {
       try {
         // Example: GET /events/:id (Adjust the endpoint to match your backend)
-        const response = await axios.get(`http://localhost:5000/events/${id}`);
+        const response = await axios.get(`http://localhost:3001/manage/${id}`);
         setEvent(response.data.event);
       } catch (error) {
         console.error("Error fetching single event:", error);
