@@ -59,8 +59,9 @@ router.patch('/getTicket/:id', async (req, res) => {
         return res.status(400).json({ Error: 'Bad Input, missing data' });
     }
 
-    if(role != "organizer" && role != "stakeholder" && role != "speaker" && role != "attendee"){
-        return res.status(400).json({ Error: 'Bad Input, choose proper role for event' });
+    if(role != "attendee"){
+        return res.status(400).json({ Error: 'Bad Input, choose proper role for event. Only Attendee allowed, ' +
+            'organiazers will have to assign other roles' });
     }
     
     const user = await UserModel.findOne({ username: username });
