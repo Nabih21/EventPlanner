@@ -34,7 +34,14 @@ const eventSchema = new mongoose.Schema({
     venues: {
         type: Array,
         default: null
-    }
+    },
+    attendees: [{
+        username: String,
+        role: {
+            type: [String],
+            enum: ['organizer', 'stakeholder', 'speaker', 'attendee']
+        }
+      }]
 });
 
 export const EventModel = mongoose.model('event', eventSchema);

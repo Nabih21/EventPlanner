@@ -1,5 +1,6 @@
 import express from 'express';
 import { EventModel } from '../models/Events.js';
+import { UserModel } from '../models/Users.js';
 
 const router = express.Router();
 
@@ -38,6 +39,58 @@ router.get('/viewEvents', async (req, res) => {
     return res.status(200).json({ 
         message: 'Event returned successfully',
         Events
+     });
+
+});
+
+
+router.patch('/getTicket/:id', async (req, res) => {
+
+    const {id} =req.params
+    const Event = await EventModel.findById(id) 
+
+    if(!Event){
+        return res.status(400).json({ Error: 'Event Not found' });
+    }
+
+    const {username, role} = req.body;
+
+    if(!username || !role){
+        return res.status(400).json({ Error: 'Bad Input, missing data' });
+    }
+
+    if(role != "organizer" && role != "stakeholder" && role != "speaker" && role != "attendee"){
+        return res.status(400).json({ Error: 'Bad Input, choose proper role for event' });
+    }
+    
+    const user = await UserModel.findOne({ username: username });
+
+    if(!user){
+        return res.status(400).json({ Error: 'User Not found' });
+    }
+
+    const attendeeObj = {
+        username: username,
+        role: role
+      }
+    const newAttendees = Event.attendees
+    
+
+    for(let i = 0; i < newAttendees.length; i++){
+
+        if(username == newAttendees[i].username){
+            return res.status(400).json({ 
+                message: 'User already registered to event'
+             });
+        }
+    }
+
+    newAttendees.push(attendeeObj)
+
+    await EventModel.findOneAndUpdate({_id: id}, {"attendees": newAttendees})
+
+    return res.status(200).json({ 
+        message: 'User registered to event successfully'
      });
 
 });
