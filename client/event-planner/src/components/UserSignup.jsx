@@ -1,22 +1,22 @@
 import { useState, useEffect } from 'react';
+import { authService } from '../services/api';
 
 const UserSignup = ({ switchToLogin }) => {
   const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
+    username: '',
     password: '',
     confirmPassword: ''
   });
   
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({
-    fullName: false,
-    email: false,
+    username: false,
     password: false,
     confirmPassword: false
   });
   const [formValid, setFormValid] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState('');
+  const [loading, setLoading] = useState(false);
   
   // Validate form on input change
   useEffect(() => {
@@ -54,8 +54,7 @@ const UserSignup = ({ switchToLogin }) => {
   // Check if all required fields are valid
   useEffect(() => {
     const formValid = 
-      formData.fullName.trim() !== '' && 
-      /\S+@\S+\.\S+/.test(formData.email) && 
+      formData.username.trim() !== '' && 
       formData.password.length >= 6 &&
       formData.password === formData.confirmPassword;
     
@@ -82,18 +81,9 @@ const UserSignup = ({ switchToLogin }) => {
   const validateForm = () => {
     const newErrors = {};
     
-    // Full name validation
-    if (touched.fullName && !formData.fullName.trim()) {
-      newErrors.fullName = 'Full name is required';
-    }
-    
-    // Email validation
-    if (touched.email) {
-      if (!formData.email) {
-        newErrors.email = 'Email is required';
-      } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-        newErrors.email = 'Email format is invalid';
-      }
+    // Username validation
+    if (touched.username && !formData.username.trim()) {
+      newErrors.username = 'Username is required';
     }
     
     // Password validation
@@ -123,8 +113,7 @@ const UserSignup = ({ switchToLogin }) => {
     
     // Mark all fields as touched to show validation errors
     const newTouched = {
-      fullName: true,
-      email: true,
+      username: true,
       password: true,
       confirmPassword: true
     };
@@ -133,18 +122,31 @@ const UserSignup = ({ switchToLogin }) => {
     
     if (validateForm()) {
       try {
-        // TODO: Add API call to backend for signup
-        console.log('Signup form submitted:', formData);
+        setLoading(true);
+        setErrors({});
         
-        // Here you would typically:
-        // 1. Send user data to backend
-        // 2. Handle the response (success/failure)
-        // 3. Redirect to login or dashboard
+        // Use the authService to register
+        const response = await authService.register(formData);
+        
+        if (response.message === 'User already exists') {
+          setErrors({ form: 'Username already taken. Please choose a different username.' });
+          return;
+        }
+        
+        if (response.message === 'User registered successfully') {
+          // Show success message and redirect to login
+          alert('Registration successful! Please log in with your new account.');
+          switchToLogin();
+        } else {
+          setErrors({ form: 'Registration failed. Please try again.' });
+        }
       } catch (error) {
         console.error('Signup failed:', error);
         setErrors({ 
-          form: 'Registration failed. Please try again.'
+          form: 'Registration failed. Please try again later.'
         });
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -180,44 +182,23 @@ const UserSignup = ({ switchToLogin }) => {
       <form onSubmit={handleSubmit} className="auth-form">
         {errors.form && <div className="error-message">{errors.form}</div>}
         
-        {/* Common fields for all users */}
         <div className="form-field">
-          <label htmlFor="fullName">Full Name</label>
+          <label htmlFor="username">Username</label>
           <input
             type="text"
-            id="fullName"
-            name="fullName"
-            value={formData.fullName}
+            id="username"
+            name="username"
+            value={formData.username}
             onChange={handleChange}
             onBlur={handleBlur}
-            placeholder="Enter your full name"
-            className={getInputClassName('fullName')}
+            placeholder="Choose a username"
+            className={getInputClassName('username')}
             required
           />
-          {touched.fullName && errors.fullName ? (
-            <div className="error-message">{errors.fullName}</div>
-          ) : touched.fullName && formData.fullName ? (
-            <div className="valid-message">Name is valid</div>
-          ) : null}
-        </div>
-        
-        <div className="form-field">
-          <label htmlFor="email">Email</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            placeholder="Enter your email"
-            className={getInputClassName('email')}
-            required
-          />
-          {touched.email && errors.email ? (
-            <div className="error-message">{errors.email}</div>
-          ) : touched.email && /\S+@\S+\.\S+/.test(formData.email) ? (
-            <div className="valid-message">Email is valid</div>
+          {touched.username && errors.username ? (
+            <div className="error-message">{errors.username}</div>
+          ) : touched.username && formData.username ? (
+            <div className="valid-message">Username is valid</div>
           ) : null}
         </div>
         
@@ -263,9 +244,9 @@ const UserSignup = ({ switchToLogin }) => {
         <button 
           type="submit" 
           className="submit-button"
-          disabled={!formValid}
+          disabled={!formValid || loading}
         >
-          Create Account
+          {loading ? 'Creating Account...' : 'Create Account'}
         </button>
       </form>
       

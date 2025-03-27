@@ -1,23 +1,23 @@
 import { useState, useEffect } from 'react';
+import { authService } from '../services/api';
 
 const AdminSignup = ({ switchToLogin }) => {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
+    username: '',
     password: '',
     confirmPassword: '',
     accessCode: '' // For restricted access verification
   });
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({
-    name: false,
-    email: false,
+    username: false,
     password: false,
     confirmPassword: false,
     accessCode: false
   });
   const [formValid, setFormValid] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState('');
+  const [loading, setLoading] = useState(false);
 
   // Validate form on input change
   useEffect(() => {
@@ -54,8 +54,7 @@ const AdminSignup = ({ switchToLogin }) => {
   // Check if all required fields are valid
   useEffect(() => {
     const isFormValid = 
-      formData.name.trim() !== '' && 
-      /\S+@\S+\.\S+/.test(formData.email) && 
+      formData.username.trim() !== '' && 
       formData.password.length >= 8 &&
       formData.password === formData.confirmPassword &&
       formData.accessCode.trim() !== '';
@@ -83,18 +82,9 @@ const AdminSignup = ({ switchToLogin }) => {
   const validateForm = () => {
     const newErrors = {};
     
-    // Name validation
-    if (touched.name && !formData.name.trim()) {
-      newErrors.name = 'Name is required';
-    }
-    
-    // Email validation
-    if (touched.email) {
-      if (!formData.email) {
-        newErrors.email = 'Email is required';
-      } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-        newErrors.email = 'Email format is invalid';
-      }
+    // Username validation
+    if (touched.username && !formData.username.trim()) {
+      newErrors.username = 'Username is required';
     }
     
     // Password validation with higher standards for admin
@@ -131,8 +121,7 @@ const AdminSignup = ({ switchToLogin }) => {
     
     // Mark all fields as touched to show validation errors
     setTouched({
-      name: true,
-      email: true,
+      username: true,
       password: true,
       confirmPassword: true,
       accessCode: true
@@ -140,18 +129,36 @@ const AdminSignup = ({ switchToLogin }) => {
     
     if (validateForm()) {
       try {
-        // TODO: Add API call to backend for admin signup
-        console.log('Admin signup form submitted:', formData);
+        setLoading(true);
+        setErrors({});
         
-        // Here you would typically:
-        // 1. Send admin data to backend with access code verification
-        // 2. Handle the response
-        // 3. Redirect to login or admin dashboard
-      } catch (error) {
-        console.error('Admin registration failed:', error);
-        setErrors({ 
-          form: 'Admin registration failed. Please check your access code or contact system support.'
+        // Use the authService to register admin
+        // Note: We're using the same registration endpoint, but might need to modify backend 
+        // to handle admin-specific fields (companyName, companyId)
+        const response = await authService.register({
+          ...formData,
+          role: 'admin' // Add role as admin
         });
+        
+        if (response.message === 'User already exists') {
+          setErrors({ form: 'Username already taken. Please choose a different username.' });
+          return;
+        }
+        
+        if (response.message === 'User registered successfully') {
+          // Show success message and redirect to login
+          alert('Admin registration successful! Please log in with your new account.');
+          switchToLogin();
+        } else {
+          setErrors({ form: 'Registration failed. Please try again.' });
+        }
+      } catch (error) {
+        console.error('Admin signup failed:', error);
+        setErrors({ 
+          form: 'Registration failed. Please try again later.'
+        });
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -192,42 +199,22 @@ const AdminSignup = ({ switchToLogin }) => {
         {errors.form && <div className="error-message">{errors.form}</div>}
         
         <div className="form-field">
-          <label htmlFor="name">Full Name</label>
+          <label htmlFor="username">Username</label>
           <input
             type="text"
-            id="name"
-            name="name"
-            value={formData.name}
+            id="username"
+            name="username"
+            value={formData.username}
             onChange={handleChange}
             onBlur={handleBlur}
-            placeholder="Enter your full name"
-            className={getInputClassName('name')}
+            placeholder="Choose a username"
+            className={getInputClassName('username')}
             required
           />
-          {touched.name && errors.name ? (
-            <div className="error-message">{errors.name}</div>
-          ) : touched.name && formData.name ? (
-            <div className="valid-message">Name is valid</div>
-          ) : null}
-        </div>
-        
-        <div className="form-field">
-          <label htmlFor="email">Email</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            placeholder="Enter your email"
-            className={getInputClassName('email')}
-            required
-          />
-          {touched.email && errors.email ? (
-            <div className="error-message">{errors.email}</div>
-          ) : touched.email && /\S+@\S+\.\S+/.test(formData.email) ? (
-            <div className="valid-message">Email is valid</div>
+          {touched.username && errors.username ? (
+            <div className="error-message">{errors.username}</div>
+          ) : touched.username && formData.username ? (
+            <div className="valid-message">Username is valid</div>
           ) : null}
         </div>
         
@@ -293,9 +280,9 @@ const AdminSignup = ({ switchToLogin }) => {
         <button 
           type="submit" 
           className="submit-button"
-          disabled={!formValid}
+          disabled={!formValid || loading}
         >
-          Register as Admin
+          {loading ? 'Registering...' : 'Register as Admin'}
         </button>
       </form>
       
