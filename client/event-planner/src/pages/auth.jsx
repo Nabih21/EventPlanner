@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import '../App.css';
+import '../styles/auth.css';
 import Login from '../components/Login';
 import UserSignup from '../components/UserSignup';
 import AdminSignup from '../components/AdminSignup';
@@ -22,7 +22,6 @@ const Auth = () => {
 
   return (
     <div className="auth-container">
-      <h1>Event Planner Authentication</h1>
       {renderAuthForm()}
     </div>
   );

@@ -5,13 +5,7 @@ const UserSignup = ({ switchToLogin }) => {
     fullName: '',
     email: '',
     password: '',
-    confirmPassword: '',
-    role: 'attendee',
-    // Role-specific fields
-    organization: '',
-    preferences: [],
-    stakeholderType: '',
-    fieldsOfExpertise: []
+    confirmPassword: ''
   });
   
   const [errors, setErrors] = useState({});
@@ -19,20 +13,11 @@ const UserSignup = ({ switchToLogin }) => {
     fullName: false,
     email: false,
     password: false,
-    confirmPassword: false,
-    organization: false,
-    stakeholderType: false
+    confirmPassword: false
   });
   const [formValid, setFormValid] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState('');
   
-  const [availablePreferences, setAvailablePreferences] = useState([
-    'Technology', 'Business', 'Arts', 'Science', 'Sports', 'Health'
-  ]);
-  const [availableExpertise, setAvailableExpertise] = useState([
-    'Leadership', 'Technology', 'Marketing', 'Finance', 'Design', 'Education'
-  ]);
-
   // Validate form on input change
   useEffect(() => {
     validateForm();
@@ -68,22 +53,13 @@ const UserSignup = ({ switchToLogin }) => {
 
   // Check if all required fields are valid
   useEffect(() => {
-    const commonFieldsValid = 
+    const formValid = 
       formData.fullName.trim() !== '' && 
       /\S+@\S+\.\S+/.test(formData.email) && 
       formData.password.length >= 6 &&
       formData.password === formData.confirmPassword;
     
-    let roleSpecificValid = true;
-    
-    // Role-specific validation
-    if (formData.role === 'attendee') {
-      roleSpecificValid = formData.organization.trim() !== '';
-    } else if (formData.role === 'stakeholder') {
-      roleSpecificValid = formData.stakeholderType.trim() !== '';
-    }
-    
-    setFormValid(commonFieldsValid && roleSpecificValid);
+    setFormValid(formValid);
   }, [formData]);
 
   const handleChange = (e) => {
@@ -101,21 +77,6 @@ const UserSignup = ({ switchToLogin }) => {
       [name]: true
     });
     validateForm();
-  };
-
-  const handleCheckboxChange = (e, field) => {
-    const { value, checked } = e.target;
-    if (checked) {
-      setFormData({
-        ...formData,
-        [field]: [...formData[field], value]
-      });
-    } else {
-      setFormData({
-        ...formData,
-        [field]: formData[field].filter(item => item !== value)
-      });
-    }
   };
 
   const validateForm = () => {
@@ -153,15 +114,6 @@ const UserSignup = ({ switchToLogin }) => {
       }
     }
     
-    // Role-specific validation
-    if (formData.role === 'attendee' && touched.organization && !formData.organization) {
-      newErrors.organization = 'Organization is required for Attendees';
-    }
-    
-    if (formData.role === 'stakeholder' && touched.stakeholderType && !formData.stakeholderType) {
-      newErrors.stakeholderType = 'Stakeholder type is required';
-    }
-    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -176,13 +128,6 @@ const UserSignup = ({ switchToLogin }) => {
       password: true,
       confirmPassword: true
     };
-    
-    // Add role-specific touched fields
-    if (formData.role === 'attendee') {
-      newTouched.organization = true;
-    } else if (formData.role === 'stakeholder') {
-      newTouched.stakeholderType = true;
-    }
     
     setTouched(newTouched);
     
@@ -227,108 +172,6 @@ const UserSignup = ({ switchToLogin }) => {
         <p>Password strength: {strengthLabels[passwordStrength]}</p>
       </div>
     );
-  };
-
-  // Render different fields based on selected role
-  const renderRoleSpecificFields = () => {
-    switch (formData.role) {
-      case 'attendee':
-        return (
-          <>
-            <div className="form-field">
-              <label htmlFor="organization">Organization (required)</label>
-              <input
-                type="text"
-                id="organization"
-                name="organization"
-                value={formData.organization}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                placeholder="Your organization"
-                className={getInputClassName('organization')}
-              />
-              {touched.organization && errors.organization ? (
-                <div className="error-message">{errors.organization}</div>
-              ) : touched.organization && formData.organization ? (
-                <div className="valid-message">Organization is valid</div>
-              ) : null}
-            </div>
-            <div className="form-field">
-              <label>Preferences</label>
-              <div className="checkbox-group">
-                {availablePreferences.map(pref => (
-                  <div key={pref} className="checkbox-item">
-                    <input
-                      type="checkbox"
-                      id={`pref-${pref}`}
-                      value={pref}
-                      checked={formData.preferences.includes(pref)}
-                      onChange={(e) => handleCheckboxChange(e, 'preferences')}
-                    />
-                    <label htmlFor={`pref-${pref}`}>{pref}</label>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </>
-        );
-      
-      case 'organizer':
-        return (
-          <div className="form-field">
-            <p>Organizer account will be set up with basic information. Event history will be tracked automatically.</p>
-          </div>
-        );
-      
-      case 'stakeholder':
-        return (
-          <div className="form-field">
-            <label htmlFor="stakeholderType">Stakeholder Type (required)</label>
-            <select
-              id="stakeholderType"
-              name="stakeholderType"
-              value={formData.stakeholderType}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              className={getInputClassName('stakeholderType')}
-            >
-              <option value="">Select type</option>
-              <option value="sponsor">Sponsor</option>
-              <option value="investor">Investor</option>
-              <option value="partner">Partner</option>
-            </select>
-            {touched.stakeholderType && errors.stakeholderType ? (
-              <div className="error-message">{errors.stakeholderType}</div>
-            ) : touched.stakeholderType && formData.stakeholderType ? (
-              <div className="valid-message">Stakeholder type is valid</div>
-            ) : null}
-          </div>
-        );
-      
-      case 'speaker':
-        return (
-          <div className="form-field">
-            <label>Fields of Expertise</label>
-            <div className="checkbox-group">
-              {availableExpertise.map(exp => (
-                <div key={exp} className="checkbox-item">
-                  <input
-                    type="checkbox"
-                    id={`exp-${exp}`}
-                    value={exp}
-                    checked={formData.fieldsOfExpertise.includes(exp)}
-                    onChange={(e) => handleCheckboxChange(e, 'fieldsOfExpertise')}
-                  />
-                  <label htmlFor={`exp-${exp}`}>{exp}</label>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-      
-      default:
-        return null;
-    }
   };
 
   return (
@@ -416,25 +259,6 @@ const UserSignup = ({ switchToLogin }) => {
             <div className="valid-message">Passwords match</div>
           ) : null}
         </div>
-        
-        <div className="form-field">
-          <label htmlFor="role">Role</label>
-          <select
-            id="role"
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
-            required
-          >
-            <option value="attendee">Attendee</option>
-            <option value="organizer">Organizer</option>
-            <option value="stakeholder">Stakeholder</option>
-            <option value="speaker">Speaker</option>
-          </select>
-        </div>
-        
-        {/* Role-specific fields */}
-        {renderRoleSpecificFields()}
         
         <button 
           type="submit" 

@@ -22,7 +22,6 @@ const AdminSignup = ({ switchToLogin }) => {
   // Validate form on input change
   useEffect(() => {
     validateForm();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData]);
 
   // Calculate password strength
