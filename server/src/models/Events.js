@@ -34,7 +34,15 @@ const eventSchema = new mongoose.Schema({
     venues: {
         type: Array,
         default: null
-    }
+    },
+    promoted: {
+        type: Boolean,
+        default: false
+    },
+    promotion: [{
+        promotion_end: Date,
+        promotion_cost_total: Number
+      }]
 });
 
 export const EventModel = mongoose.model('event', eventSchema);
