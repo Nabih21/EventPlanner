@@ -60,4 +60,57 @@ router.get('/showPromotedEvents', async (req, res) => {
 });
 
 
+router.patch('/promoteEvent/:_id', async (req, res) => {
+
+     const _id = req.params
+     let Event;
+
+    try{
+        Event = await EventModel.findById(_id)
+    }
+    catch(error) {
+        return res.status(400).json({ 
+         Error: "id provided is invalid"
+         });
+    }
+     if(!Event){
+         return res.status(400).json({ 
+             message: 'Sorry, no event with that id'
+          });
+     }
+ 
+     if(Event.promoted == true){
+         return res.status(400).json({ 
+             message: 'Event currently with active promotion'
+          });
+     }
+     
+     console.log(Event.promotion)
+     let newpromotion = Event.promotion
+     if (typeof newpromotion === 'undefined'){
+        newpromotion = []
+     }
+
+     const current_date = new Date()
+     const promotion_end = current_date.setDate(current_date.getDate() + 5);
+     const addedpromotion = {
+         promotion_end: promotion_end,
+         promotion_cost_total: 0
+     }
+ 
+     newpromotion.push(addedpromotion)
+     console.log(newpromotion)
+
+
+     const update = await EventModel.findOneAndUpdate({ _id: _id }, 
+         { promoted: true, promotion: newpromotion})  
+ 
+ 
+     return res.status(200).json({ 
+         message: 'Event Promoted successfully',
+         Event
+      });
+
+});
+
 export {router as eventsRouter};
