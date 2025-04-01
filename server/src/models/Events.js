@@ -35,6 +35,14 @@ const eventSchema = new mongoose.Schema({
         type: Array,
         default: null
     },
+    promoted: {
+        type: Boolean,
+        default: false
+    },
+    promotion: [{
+        promotion_end: Date,
+        promotion_cost_total: Number
+    }],
     attendees: [{
         username: String,
         role: {
