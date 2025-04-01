@@ -7,8 +7,8 @@ const Venues = () => {
   useEffect(() => {
     const fetchVenues = async () => {
       try {
-        const response = await axios.get("http://localhost:3001/venues");
-        setVenues(response.data);
+        const response = await axios.get("http://localhost:3001/venues/viewVenues");
+        setVenues(response.data.Venues);
       } catch (err) {
         console.error("Failed to fetch venues:", err);
       }
@@ -36,7 +36,7 @@ const Venues = () => {
               <td>{venue.location}</td>
               <td>{venue.capacity}</td>
               <td>{venue.type}</td>
-              <td>{new Date(venue.availability).toLocaleString()}</td>
+              <td>{new Date(venue.available_at).toLocaleString()}</td>
             </tr>
           ))}
         </tbody>
