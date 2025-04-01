@@ -7,6 +7,26 @@ import { useNavigate } from 'react-router-dom';
 
 export const NavBar = () => {
 
+    const css = `
+    .navbar {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      background-color: #f8f8f8;
+      padding: 1rem;
+      border-bottom: 1px solid #ccc;
+    }
+    .navbar a {
+      color: #333;
+      text-decoration: none;
+      font-weight: bold;
+      margin: 0 1rem;
+    }
+    .navbar a:hover {
+      color: #555;
+    }
+  `;
+
     const [cookies, setCookies] = useCookies(["access_token"]);
     const nav = useNavigate();
 
@@ -28,7 +48,7 @@ export const NavBar = () => {
         : 
         <button onClick={logout}> Logout </button>
         }
-        
+        <style dangerouslySetInnerHTML={{ __html: css }} />
     </div>
     );
 };
