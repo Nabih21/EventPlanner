@@ -5,7 +5,7 @@ import { UserModel } from '../models/Users.js';
 const router = express.Router();
 
 router.post('/createEvent', async (req, res) => {
-    const { name, location, description, start_date, end_date} = req.body;
+    const { name, location, description, start_date, end_date, status} = req.body;
 
     /* Maybe create code that checks for event time conflict in exact same location?
   
@@ -20,7 +20,8 @@ router.post('/createEvent', async (req, res) => {
         location,
         description,
         start_date,
-        end_date
+        end_date,
+        status
     })
     await newEvent.save();
 
