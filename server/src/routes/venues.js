@@ -5,21 +5,31 @@ const router = express.Router();
 
 
 router.post('/createVenue', async (req, res) => {
-    const { capacity, location} = req.body;
+    const { name, capacity, location, type, available_at } = req.body;
 
     /* Maybe create code that checks for event time conflict in exact same location?
   
 
     */
-    if(!capacity || !location){
+    if(!name || !capacity || !location){
         return res.status(400).json({ Error: 'Bad Input, missing data' });
     }
 
     const newVenue = new VenueModel({
+        name,
         capacity,
-        location
+        location,
+        type,
+        available_at
     })
+    try{
     await newVenue.save();
+    }
+    catch(error) {
+        return res.status(400).json({ 
+         Error: "Unique constraint for some fields not fullfilled (or maybe another error)"
+         });
+    }
 
     return res.status(200).json({ message: 'Venue Created successfully' });
 
