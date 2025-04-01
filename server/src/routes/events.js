@@ -45,9 +45,9 @@ router.get('/viewEvents', async (req, res) => {
 
 router.get('/showPromotedEvents', async (req, res) => {
 
-    const Events = await EventModel.find({"promoted": true})  
+    const Events = await EventModel.find({promoted: true})  
 
-    if(!Events.rows){
+    if(!Events){
         return res.status(404).json({ 
             message: 'Sorry, no events promoted currently'
          });
