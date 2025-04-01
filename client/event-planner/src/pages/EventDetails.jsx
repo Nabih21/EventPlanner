@@ -1,4 +1,3 @@
-// src/pages/EventDetails.jsx
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
@@ -10,9 +9,9 @@ const EventDetails = () => {
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        // Example: GET /events/:id (Adjust the endpoint to match your backend)
-        const response = await axios.get(`http://localhost:3001/manage/${id}`);
-        setEvent(response.data.event);
+        const response = await axios.get(`http://localhost:3001/manage/viewEvent/${id}`);
+        console.log("Single event response:", response.data); 
+        setEvent(response.data.Event); 
       } catch (error) {
         console.error("Error fetching single event:", error);
       }
@@ -25,11 +24,7 @@ const EventDetails = () => {
     return <div>Loading event details...</div>;
   }
 
-  const handleRegister = () => {
-    // This currently does nothing, as requested
-    alert("Register button clicked! (No further action yet)");
-  };
-
+  // If event is correctly set, you’ll see this:
   return (
     <div style={{ padding: "1rem" }}>
       <h1>{event.name}</h1>
@@ -38,7 +33,9 @@ const EventDetails = () => {
       <p><strong>Start Date:</strong> {new Date(event.start_date).toLocaleDateString()}</p>
       <p><strong>End Date:</strong> {new Date(event.end_date).toLocaleDateString()}</p>
       <p><strong>Status:</strong> {event.status}</p>
-      <button onClick={handleRegister}>Register</button>
+      <button onClick={() => alert("Register button clicked! (No further action yet)")}>
+        Register
+      </button>
     </div>
   );
 };
