@@ -21,6 +21,8 @@ export const NavBar = () => {
     <div className="navbar">
 
         <Link to="/">Home</Link>
+        <Link to="/events">View Events</Link>
+        <Link to="/venues">View Venues</Link>
         { !cookies.access_token ?
         <Link to="/auth">Login</Link> 
         : 

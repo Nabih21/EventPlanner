@@ -4,6 +4,7 @@ import Home from './pages/home'
 import Auth from './pages/auth'
 import Events from "./pages/Events";
 import EventDetails from "./pages/EventDetails";
+import Venues from './pages/Venues'; 
 import { BrowserRouter as Router, Routes, Route  } from 'react-router-dom'
 
 
@@ -18,6 +19,7 @@ function App() {
             <Route path="/auth" element={<Auth />} />
             <Route path="/events" element={<Events />} />
             <Route path="/event/:id" element={<EventDetails />} />
+            <Route path="/venues" element={<Venues />} />
           </Routes>
       </Router>
      
