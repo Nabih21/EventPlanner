@@ -42,6 +42,13 @@ const eventSchema = new mongoose.Schema({
     promotion: [{
         promotion_end: Date,
         promotion_cost_total: Number
+    }],
+    attendees: [{
+        username: String,
+        role: {
+            type: [String],
+            enum: ['organizer', 'stakeholder', 'speaker', 'attendee']
+        }
       }]
 });
 
