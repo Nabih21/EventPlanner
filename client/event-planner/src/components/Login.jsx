@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { authService } from '../services/api';
+import { FaUser, FaLock, FaSpinner } from 'react-icons/fa';
 
 const Login = ({ switchToSignup, switchToAdminSignup }) => {
   const [formData, setFormData] = useState({
@@ -96,8 +97,8 @@ const Login = ({ switchToSignup, switchToAdminSignup }) => {
           localStorage.setItem('token', response.token);
           localStorage.setItem('userID', response.userID);
           
-          // Redirect based on role
-          window.location.href = formData.role === 'admin' ? '/admin' : '/dashboard';
+          // Redirect to Events page
+          window.location.href = '/events';
         } else {
           setErrors({ form: 'Login failed. Please try again.' });
         }
@@ -123,7 +124,9 @@ const Login = ({ switchToSignup, switchToAdminSignup }) => {
         {errors.form && <div className="error-message">{errors.form}</div>}
         
         <div className="form-field">
-          <label htmlFor="username">Username</label>
+          <label htmlFor="username">
+            <FaUser className="input-icon" /> Username
+          </label>
           <input
             type="text"
             id="username"
@@ -143,7 +146,9 @@ const Login = ({ switchToSignup, switchToAdminSignup }) => {
         </div>
         
         <div className="form-field">
-          <label htmlFor="password">Password</label>
+          <label htmlFor="password">
+            <FaLock className="input-icon" /> Password
+          </label>
           <input
             type="password"
             id="password"
@@ -180,7 +185,13 @@ const Login = ({ switchToSignup, switchToAdminSignup }) => {
           className="submit-button"
           disabled={!formValid || loading}
         >
-          {loading ? 'Logging in...' : 'Login'}
+          {loading ? (
+            <>
+              <FaSpinner className="spinner-icon" /> Logging in...
+            </>
+          ) : (
+            'Login'
+          )}
         </button>
       </form>
       
