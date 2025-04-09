@@ -188,12 +188,12 @@ router.get('/viewEvent/:id', async (req, res) => {
 
       
       
-router.delete('/deleteEvent/:id', async (req, res) => {
+router.delete('/deleteEvent/:id', getUserFromJwtToken, async (req, res) => {
 
     const {id} =req.params
     let Event
     try{
-    Event = await EventModel.findByIdAndDelete(id) // maybe add a check to see id person deleting is organizer of event or not
+    Event = await EventModel.findById(id) // maybe add a check to see id person deleting is organizer of event or not
     }
     catch(error) {
         return res.status(400).json({ 
@@ -206,8 +206,96 @@ router.delete('/deleteEvent/:id', async (req, res) => {
          });
     }
 
-    return res.status(200).json({ 
-        message: 'Event deleted successfully'
+    for(let i = 0; i < Event.attendees.length; i++){
+
+        if(req.user.username == Event.attendees[i].username){
+            if(Event.attendees[i].role == "organizer"){
+                await EventModel.findByIdAndDelete(id)
+                return res.status(200).json({ 
+                    message: 'Event deleted successfully'
+                });
+            }
+            return res.status(400).json({ 
+                    message: 'You are not this events organizer. Only an organizer can delete the event'
+                });
+        }
+    }
+
+
+    return res.status(400).json({ 
+        message: 'Shouldnt even be able to see this option :C. You are not this events organizer. Only an organizer can delete the event'
+     });
+
+});
+
+
+router.patch('/inviteToEvent/:id', getUserFromJwtToken, async (req, res) => {
+
+    const {id} =req.params
+    let Event
+    try{
+    Event = await EventModel.findById(id)
+    }
+    catch(error) {
+        return res.status(400).json({ 
+            Error: "id provided is invalid"
+         });
+    }
+    if(!Event){
+        return res.status(400).json({ 
+            Error: 'No Event with such ID'
+         });
+    }
+
+    const {username, role} = req.body
+
+    if(!username || !role || (role != "organizer" && role != "stakeholder" && role != "speaker" && role != "attendee")){
+        return res.status(400).json({ Error: 'Bad Input, missing / incorrect data' });
+    }
+
+    const user = await UserModel.findOne({ username: username });
+
+    if ( !user) {
+        console.log("Attempted user to invite is non-existent")
+        return res.json({ message: 'InvalidUser' });
+    }
+
+
+
+    for(let i = 0; i < Event.attendees.length; i++){
+        if(username == Event.attendees[i].username){
+            return res.status(400).json({ 
+                message: 'User already registered to event'
+             });
+        }
+    } 
+    for(let i = 0; i < Event.attendees.length; i++){
+
+        if(req.user.username == Event.attendees[i].username){
+            
+            if(Event.attendees[i].role == "organizer"){
+                const newAttendees = Event.attendees
+
+                const attendeeObj = {
+                    username: username,
+                    role: role
+                  }
+
+                newAttendees.push(attendeeObj)
+                await EventModel.findOneAndUpdate({_id: id}, {attendees: newAttendees})
+            
+                return res.status(200).json({ 
+                  message: 'User registered to event successfully'
+               });
+            }
+            return res.status(400).json({ 
+                    message: 'You are not this events organizer. Only an organizer can invite others to the event'
+            });
+        }
+    }
+
+    return res.status(400).json({ 
+        message: 'You are not this events organizer. Only an organizer can invite others to the event'
      });
 
 });
