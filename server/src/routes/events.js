@@ -256,8 +256,7 @@ router.patch('/inviteToEvent/:id', getUserFromJwtToken, async (req, res) => {
     const user = await UserModel.findOne({ username: username });
 
     if ( !user) {
-        console.log("Attempted user to invite is non-existent")
-        return res.json({ message: 'InvalidUser' });
+        return res.json({ message: 'Attempted user to invite is non-existent' });
     }
 
 
