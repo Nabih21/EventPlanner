@@ -34,20 +34,32 @@ const EventCard = ({ event }) => {
     }
   };
 
+  // Get status color
+  const getPromotionColor = (promoted) => {
+    if(promoted) {
+      return 'gold'; // Gold for promoted events
+    }
+  };
+
+  // Define the card style with an optional gold border if event.promotion is true
+  const cardStyle = {
+    cursor: 'pointer',
+    position: 'relative',
+    overflow: 'hidden',
+    display: 'flex',
+    flexDirection: 'row',
+    height: '100%',
+    width: '100%',
+    marginBottom: '0',
+    borderRadius: '10px',
+    border: '4px solid #2b5876' 
+  };
+
   return (
-    <div
+    <div 
       onClick={handleCardClick}
       className={styles.eventCard}
-      style={{ 
-        cursor: 'pointer',
-        position: 'relative',
-        overflow: 'hidden',
-        display: 'flex',
-        flexDirection: 'row',
-        height: '100%',
-        width: '100%',
-        marginBottom: '0'
-      }}
+      style={cardStyle}
     >
       <div style={{ 
         position: 'relative',
@@ -84,6 +96,22 @@ const EventCard = ({ event }) => {
         }}>
           {event.status || 'Unknown'}
         </div>
+
+        {event.promoted &&
+        <div style={{
+          position: 'absolute',
+          top: '10px',
+          left: '10px',
+          backgroundColor: '#D4AF37',
+          color: 'white',
+          padding: '5px 10px',
+          borderRadius: '20px',
+          fontSize: '0.8rem',
+          fontWeight: 'bold',
+          boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
+        }}>
+          Sponsored
+        </div>}
       </div>
       
       <div style={{ 
