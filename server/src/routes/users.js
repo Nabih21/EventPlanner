@@ -1,7 +1,11 @@
 import express from 'express';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt'; 
 import { UserModel } from '../models/Users.js';
+
+
+// Services
+import { generateToken, verifyToken } from '../service/jwt.js';
+import { hashPassword, verifyPassword } from '../service/password.js';
+
 
 const router = express.Router();
 
@@ -13,9 +17,7 @@ router.post('/register', async (req, res) => {
     if (user) {
         return res.json({ message: 'User already exists' });
     }
-
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const hashedPassword = await hashPassword(password);
 
     const newUser = new UserModel({
         username,
@@ -37,17 +39,15 @@ router.post('/login', async (req, res) => {
         return res.json({ message: 'InvalidUser' });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await verifyPassword(password, user.password);
 
     if ( !isPasswordValid) {
         console.log("Username or password is incorrect")
         return res.json({ message: 'PasswordBad' });
     }
 
-    const token = jwt.sign({
-        id : user._id,
-    },  "secret") ;
-    res.json({token, userID: user._id});
+    const token = generateToken({userID: user._id, username: user.username}) ;
+    res.json({token, userID: user._id, username: user.username});
 
 });
 
