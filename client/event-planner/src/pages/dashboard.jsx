@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Navigate, useNavigate, Link } from 'react-router-dom';
+import { Navigate, useNavigate, Link, useLocation } from 'react-router-dom';
 import { authService } from '../services/api';
 import api from '../services/api';
 import styles from './dashboard.module.css';
@@ -15,6 +15,9 @@ import {
 } from 'react-icons/fa';
 
 const Dashboard = () => {
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(location.state?.activeTab || 'overview');
+  
   // State for user data
   const [userData, setUserData] = useState(null);
   const [userTickets, setUserTickets] = useState([]);
@@ -35,7 +38,6 @@ const Dashboard = () => {
     friends: null,
     friendRequests: null
   });
-  const [activeTab, setActiveTab] = useState('overview');
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);
   const navigate = useNavigate();
 
@@ -145,6 +147,14 @@ const Dashboard = () => {
     fetchFriendRequests();
     fetchFriends();
   }, [token, userID]);
+
+  useEffect(() => {
+    if (location.state?.activeTab) {
+      setActiveTab(location.state.activeTab);
+      // Clear the state after using it
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   // Handle logout
   const handleLogout = () => {
