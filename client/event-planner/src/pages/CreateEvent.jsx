@@ -34,7 +34,7 @@ export default function CreateEvent() {
     try {
       const response = await api.post('/manage/createEvent', formData);
       if (response.data && response.data.Event) {
-        navigate(`/events/${response.data.Event._id}`);
+        navigate('/dashboard', { state: { activeTab: 'events' } });
       }
     } catch (err) {
       setError(err.response?.data?.Error || 'Failed to create event. Please try again.');
