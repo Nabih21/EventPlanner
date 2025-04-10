@@ -1,8 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
 import { eventService } from "../services/api";
-import { motion } from "framer-motion";
 import { 
   FaCalendarAlt, 
   FaMapMarkerAlt, 
@@ -16,7 +14,8 @@ import {
   FaCreditCard,
   FaLock,
   FaUser,
-  FaTimes
+  FaTimes,
+  FaFilePdf
 } from "react-icons/fa";
 import styles from "./LandingPage.module.css";
 import api from "../services/api"; // Import your API service
@@ -29,6 +28,8 @@ const EventDetails = () => {
   const [error, setError] = useState(null);
   const [isRegistered, setIsRegistered] = useState(false);
   const [registrationDetails, setRegistrationDetails] = useState(null);
+  const [resources, setResources] = useState([]);
+  const [loadingResources, setLoadingResources] = useState(false);
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -37,6 +38,9 @@ const EventDetails = () => {
         const response = await eventService.getEvent(id);
         setEvent(response.Event);
         setError(null);
+        
+        // Fetch resources for this event
+        fetchResources(id);
       } catch (error) {
         console.error("Error fetching single event:", error);
         setError("Failed to load event details. Please try again later.");
@@ -47,6 +51,18 @@ const EventDetails = () => {
 
     fetchEvent();
   }, [id]);
+
+  const fetchResources = async (eventId) => {
+    try {
+      setLoadingResources(true);
+      const response = await api.get(`/resources/event/${eventId}`);
+      setResources(response.data.Resources || []);
+    } catch (error) {
+      console.error("Error fetching resources:", error);
+    } finally {
+      setLoadingResources(false);
+    }
+  };
 
   // Format date to a more readable format
   const formatDate = (dateString) => {
@@ -277,39 +293,10 @@ const EventDetails = () => {
     }
   };
 
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { 
-      opacity: 1,
-      transition: { 
-        duration: 0.5,
-        when: "beforeChildren",
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: { 
-      y: 0, 
-      opacity: 1,
-      transition: { 
-        type: "spring", 
-        stiffness: 300, 
-        damping: 24 
-      }
-    }
-  };
-
   if (loading) {
     return (
-      <motion.div 
+      <div 
         className={styles.landingContainer}
-        initial="hidden"
-        animate="visible"
-        variants={containerVariants}
         style={{ 
           display: 'flex', 
           justifyContent: 'center', 
@@ -318,25 +305,20 @@ const EventDetails = () => {
           paddingTop: '80px' // Add padding to account for fixed navbar
         }}
       >
-        <motion.div 
+        <div 
           className={styles.loadingContainer}
-          variants={itemVariants}
-          style={{ textAlign: 'center' }}
         >
           <FaSpinner className={styles.spinner} style={{ fontSize: '3rem', marginBottom: '1rem' }} />
           <h2>Loading event details...</h2>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <motion.div 
+      <div 
         className={styles.landingContainer}
-        initial="hidden"
-        animate="visible"
-        variants={containerVariants}
         style={{ 
           display: 'flex', 
           justifyContent: 'center', 
@@ -345,10 +327,8 @@ const EventDetails = () => {
           paddingTop: '80px' // Add padding to account for fixed navbar
         }}
       >
-        <motion.div 
+        <div 
           className={styles.errorContainer}
-          variants={itemVariants}
-          style={{ textAlign: 'center' }}
         >
           <FaExclamationTriangle style={{ fontSize: '3rem', color: '#F44336', marginBottom: '1rem' }} />
           <h2>Error</h2>
@@ -360,18 +340,15 @@ const EventDetails = () => {
           >
             Try Again
           </button>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     );
   }
 
   if (!event) {
     return (
-      <motion.div 
+      <div 
         className={styles.landingContainer}
-        initial="hidden"
-        animate="visible"
-        variants={containerVariants}
         style={{ 
           display: 'flex', 
           justifyContent: 'center', 
@@ -380,10 +357,8 @@ const EventDetails = () => {
           paddingTop: '80px' // Add padding to account for fixed navbar
         }}
       >
-        <motion.div 
+        <div 
           className={styles.errorContainer}
-          variants={itemVariants}
-          style={{ textAlign: 'center' }}
         >
           <FaInfoCircle style={{ fontSize: '3rem', color: '#2196F3', marginBottom: '1rem' }} />
           <h2>Event Not Found</h2>
@@ -395,17 +370,14 @@ const EventDetails = () => {
           >
             Back to Events
           </button>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <motion.div 
+    <div 
       className={styles.landingContainer}
-      initial="hidden"
-      animate="visible"
-      variants={containerVariants}
       style={{ paddingTop: '80px' }} // Add padding to account for fixed navbar
     >
       <div className={styles.hero} style={{ 
@@ -419,10 +391,8 @@ const EventDetails = () => {
         flexDirection: 'column',
         justifyContent: 'center'
       }}>
-        <motion.div 
+        <div 
           className={styles.heroContent}
-          variants={itemVariants}
-          style={{ maxWidth: '800px', width: '100%' }}
         >
           <div style={{ width: '100%', marginBottom: '2rem' }}>
             <button 
@@ -502,11 +472,7 @@ const EventDetails = () => {
               
               {/* Payment Form Overlay */}
               {showPaymentForm && (
-                <motion.div
-                  initial={{ x: "-100%", opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  exit={{ x: "-100%", opacity: 0 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                <div
                   style={{
                     position: "fixed",
                     top: 0,
@@ -521,10 +487,7 @@ const EventDetails = () => {
                     alignItems: "center"
                   }}
                 >
-                  <motion.div
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.2 }}
+                  <div
                     style={{
                       backgroundColor: "white",
                       borderRadius: "20px",
@@ -796,8 +759,8 @@ const EventDetails = () => {
                         <FaExclamationTriangle /> {paymentError}
                       </div>
                     )}
-                  </motion.div>
-                </motion.div>
+                  </div>
+                </div>
               )}
               
               {/* Error Message */}
@@ -878,72 +841,290 @@ const EventDetails = () => {
               )}
             </div>
           )}
-        </motion.div>
+        </div>
       </div>
 
       <div className={styles.features} style={{ padding: "4rem 5%", backgroundColor: '#f8f9fa' }}>
-        <motion.div 
-          className={styles.featureGrid}
-          variants={containerVariants}
-          style={{ maxWidth: '1200px', margin: '0 auto' }}
-        >
-          <motion.div 
-            className={styles.featureCard}
-            variants={itemVariants}
-            style={{ 
-              gridColumn: '1 / -1',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '1.5rem'
-            }}
-          >
-            <h2 style={{ marginBottom: '0.5rem', color: '#2d3748' }}>About This Event</h2>
-            <p style={{ color: '#718096', lineHeight: '1.8', fontSize: '1.1rem' }}>
-              {event.description || 'No description available for this event.'}
-            </p>
-          </motion.div>
-          
-          <motion.div 
-            className={styles.featureCard}
-            variants={itemVariants}
-          >
-            <div className={styles.featureIcon} style={{ backgroundColor: 'rgba(33, 150, 243, 0.1)' }}>
-              <FaUserFriends style={{ color: '#2196F3', fontSize: '2rem' }} />
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          {/* About Section */}
+          <div style={{ marginBottom: '3rem' }}>
+            <h2 style={{ 
+              marginBottom: '2rem', 
+              color: '#2d3748', 
+              fontSize: '2rem',
+              textAlign: 'center',
+              position: 'relative',
+              paddingBottom: '1rem'
+            }}>
+              About This Event
+              <div style={{
+                position: 'absolute',
+                bottom: 0,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: '60px',
+                height: '4px',
+                backgroundColor: '#2b5876',
+                borderRadius: '2px'
+              }} />
+            </h2>
+            <div style={{ 
+              backgroundColor: 'white',
+              borderRadius: '1rem',
+              padding: '2rem',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+              marginBottom: '2rem'
+            }}>
+              <p style={{ 
+                color: '#718096', 
+                lineHeight: '1.8', 
+                fontSize: '1.1rem',
+                whiteSpace: 'pre-wrap'
+              }}>
+                {event.description || 'No description available for this event.'}
+              </p>
             </div>
-            <h3 style={{ marginBottom: '1rem', color: '#2d3748' }}>Attendees</h3>
-            <p style={{ color: '#718096' }}>
-              Join other attendees at this exciting event. Connect with like-minded individuals and expand your network.
-            </p>
-          </motion.div>
-          
-          <motion.div 
-            className={styles.featureCard}
-            variants={itemVariants}
-          >
-            <div className={styles.featureIcon} style={{ backgroundColor: 'rgba(76, 175, 80, 0.1)' }}>
-              <FaCalendarAlt style={{ color: '#4CAF50', fontSize: '2rem' }} />
+          </div>
+
+          {/* Feature Cards Grid */}
+          <div style={{ 
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: '2rem',
+            marginTop: '2rem'
+          }}>
+            {/* Attendees Card */}
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '1rem',
+              padding: '2rem',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+              transition: 'transform 0.2s ease-in-out',
+              cursor: 'pointer',
+              ':hover': {
+                transform: 'translateY(-5px)'
+              }
+            }}>
+              <div style={{ 
+                width: '60px',
+                height: '60px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '1.5rem'
+              }}>
+                <FaUserFriends style={{ color: '#2196F3', fontSize: '1.8rem' }} />
+              </div>
+              <h3 style={{ 
+                marginBottom: '1rem', 
+                color: '#2d3748',
+                fontSize: '1.3rem',
+                fontWeight: '600'
+              }}>Attendees</h3>
+              <p style={{ color: '#718096', lineHeight: '1.6' }}>
+                Join other attendees at this exciting event. Connect with like-minded individuals and expand your network.
+              </p>
             </div>
-            <h3 style={{ marginBottom: '1rem', color: '#2d3748' }}>Schedule</h3>
-            <p style={{ color: '#718096' }}>
-              The event will take place from {formatDate(event.start_date)} to {formatDate(event.end_date)}.
-            </p>
-          </motion.div>
-          
-          <motion.div 
-            className={styles.featureCard}
-            variants={itemVariants}
-          >
-            <div className={styles.featureIcon} style={{ backgroundColor: 'rgba(156, 39, 176, 0.1)' }}>
-              <FaMapMarkerAlt style={{ color: '#9C27B0', fontSize: '2rem' }} />
+
+            {/* Schedule Card */}
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '1rem',
+              padding: '2rem',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+              transition: 'transform 0.2s ease-in-out',
+              cursor: 'pointer',
+              ':hover': {
+                transform: 'translateY(-5px)'
+              }
+            }}>
+              <div style={{ 
+                width: '60px',
+                height: '60px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '1.5rem'
+              }}>
+                <FaCalendarAlt style={{ color: '#4CAF50', fontSize: '1.8rem' }} />
+              </div>
+              <h3 style={{ 
+                marginBottom: '1rem', 
+                color: '#2d3748',
+                fontSize: '1.3rem',
+                fontWeight: '600'
+              }}>Schedule</h3>
+              <p style={{ color: '#718096', lineHeight: '1.6' }}>
+                The event will take place from {formatDate(event.start_date)} to {formatDate(event.end_date)}.
+                <br />
+                <span style={{ 
+                  display: 'block', 
+                  marginTop: '0.5rem',
+                  padding: '0.5rem',
+                  backgroundColor: '#f7fafc',
+                  borderRadius: '0.5rem',
+                  fontSize: '0.9rem'
+                }}>
+                  Time: {formatTime(event.start_date)} - {formatTime(event.end_date)}
+                </span>
+              </p>
             </div>
-            <h3 style={{ marginBottom: '1rem', color: '#2d3748' }}>Location</h3>
-            <p style={{ color: '#718096' }}>
-              The event will be held at {event.location}. Please arrive 15 minutes before the start time.
-            </p>
-          </motion.div>
-        </motion.div>
+
+            {/* Location Card */}
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '1rem',
+              padding: '2rem',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+              transition: 'transform 0.2s ease-in-out',
+              cursor: 'pointer',
+              ':hover': {
+                transform: 'translateY(-5px)'
+              }
+            }}>
+              <div style={{ 
+                width: '60px',
+                height: '60px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(156, 39, 176, 0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '1.5rem'
+              }}>
+                <FaMapMarkerAlt style={{ color: '#9C27B0', fontSize: '1.8rem' }} />
+              </div>
+              <h3 style={{ 
+                marginBottom: '1rem', 
+                color: '#2d3748',
+                fontSize: '1.3rem',
+                fontWeight: '600'
+              }}>Location</h3>
+              <p style={{ color: '#718096', lineHeight: '1.6' }}>
+                The event will be held at{' '}
+                <span style={{ 
+                  backgroundColor: '#f7fafc',
+                  padding: '0.25rem 0.5rem',
+                  borderRadius: '0.25rem',
+                  fontWeight: '500'
+                }}>
+                  {event.location}
+                </span>
+                <br />
+                <span style={{ 
+                  display: 'block', 
+                  marginTop: '0.5rem', 
+                  fontSize: '0.9rem',
+                  color: '#9C27B0'
+                }}>
+                  Please arrive 15 minutes before the start time.
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
-    </motion.div>
+
+      {/* Resources Section */}
+      {event && (
+        <div className={styles.section} style={{ marginTop: '2rem' }}>
+          <h2 style={{ 
+            fontSize: '1.5rem', 
+            fontWeight: 'bold', 
+            marginBottom: '1rem',
+            color: '#2D3748',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            <FaFilePdf style={{ color: '#E53E3E' }} />
+            Event Resources
+          </h2>
+          
+          {loadingResources ? (
+            <div style={{ textAlign: 'center', padding: '2rem' }}>
+              <FaSpinner className={styles.spinner} />
+              <p>Loading resources...</p>
+            </div>
+          ) : resources.length > 0 ? (
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
+              gap: '1rem'
+            }}>
+              {resources.map((resource) => (
+                <div 
+                  key={resource._id}
+                  style={{
+                    backgroundColor: '#F7FAFC',
+                    borderRadius: '0.5rem',
+                    padding: '1rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.5rem',
+                    border: '1px solid #E2E8F0'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <FaFilePdf style={{ color: '#E53E3E', fontSize: '1.5rem' }} />
+                    <h3 style={{ 
+                      fontSize: '1rem', 
+                      fontWeight: 'bold',
+                      color: '#2D3748',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {resource.name}
+                    </h3>
+                  </div>
+                  
+                  <p style={{ 
+                    fontSize: '0.875rem', 
+                    color: '#718096',
+                    marginBottom: '0.5rem'
+                  }}>
+                    Uploaded on {new Date(resource.uploadedAt).toLocaleDateString()}
+                  </p>
+                  
+                  <a 
+                    href={`http://localhost:3001${resource.fileUrl}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'inline-block',
+                      padding: '0.5rem 1rem',
+                      backgroundColor: '#4299E1',
+                      color: 'white',
+                      borderRadius: '0.375rem',
+                      textDecoration: 'none',
+                      textAlign: 'center',
+                      transition: 'background-color 0.2s'
+                    }}
+                  >
+                    View PDF
+                  </a>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ 
+              textAlign: 'center', 
+              padding: '2rem',
+              backgroundColor: '#F7FAFC',
+              borderRadius: '0.5rem',
+              color: '#718096'
+            }}>
+              <p>No resources available for this event.</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 };
 

@@ -62,8 +62,13 @@ export const eventService = {
   },
 
   getEvent: async (id) => {
-    const response = await api.get(`/manage/viewEvent/${id}`);
-    return response.data;
+    try {
+      const response = await api.get(`/manage/viewEvent/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching event:', error);
+      throw error;
+    }
   },
 
   editEvent: async (id, eventData) => {

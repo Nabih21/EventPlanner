@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaCalendarAlt, FaMapMarkerAlt, FaImage, FaListUl } from 'react-icons/fa';
+import { FaCalendarAlt, FaMapMarkerAlt, FaImage, FaListUl, FaFileUpload } from 'react-icons/fa';
 import api from '../services/api';
 import styles from './LandingPage.module.css';
 
@@ -17,6 +17,8 @@ export default function CreateEvent() {
     status: 'planned',
     picture: '',
   });
+  const [resources, setResources] = useState([]);
+  const [uploadingResources, setUploadingResources] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -26,18 +28,96 @@ export default function CreateEvent() {
     }));
   };
 
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    
+    // Validate file types and sizes
+    const validFiles = files.filter(file => {
+      if (file.type !== 'application/pdf') {
+        setError(`${file.name} is not a PDF file. Only PDF files are allowed.`);
+        return false;
+      }
+      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        setError(`${file.name} is too large. Maximum file size is 10MB.`);
+        return false;
+      }
+      return true;
+    });
+    
+    setResources(prev => [...prev, ...validFiles]);
+  };
+
+  const removeResource = (index) => {
+    setResources(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
+      // First create the event
       const response = await api.post('/manage/createEvent', formData);
+      
       if (response.data && response.data.Event) {
+        const eventId = response.data.Event._id;
+        console.log("Event created successfully with ID:", eventId);
+        
+        // If there are resources to upload
+        if (resources.length > 0) {
+          setUploadingResources(true);
+          let uploadErrors = [];
+          
+          // Upload each resource
+          for (const file of resources) {
+            try {
+              console.log("Uploading file:", file.name);
+              const formData = new FormData();
+              formData.append('resource', file);
+              formData.append('name', file.name);
+              
+              // Log the request details
+              console.log("Upload URL:", `/resources/upload/${eventId}`);
+              console.log("File type:", file.type);
+              console.log("File size:", file.size);
+              
+              const uploadResponse = await api.post(`/resources/upload/${eventId}`, formData, {
+                headers: {
+                  'Content-Type': 'multipart/form-data'
+                },
+                // Add timeout and validate status
+                timeout: 30000, // 30 seconds timeout
+                validateStatus: function (status) {
+                  return status >= 200 && status < 300; // Only accept 2xx status codes
+                }
+              });
+              
+              console.log("Upload response:", uploadResponse.data);
+            } catch (uploadError) {
+              console.error("Error uploading file:", uploadError);
+              console.error("Error details:", uploadError.response?.data);
+              const errorMessage = uploadError.response?.data?.Error || uploadError.message;
+              uploadErrors.push(`${file.name}: ${errorMessage}`);
+            }
+          }
+          
+          setUploadingResources(false);
+          
+          // If there were any upload errors, show them to the user
+          if (uploadErrors.length > 0) {
+            setError(`Some files failed to upload:\n${uploadErrors.join('\n')}`);
+            return;
+          }
+        }
+        
         navigate('/dashboard', { state: { activeTab: 'events' } });
       }
     } catch (err) {
+      console.error("Error creating event:", err);
+      console.error("Error details:", err.response?.data);
       setError(err.response?.data?.Error || 'Failed to create event. Please try again.');
+      setUploadingResources(false);
     } finally {
       setLoading(false);
     }
@@ -250,24 +330,103 @@ export default function CreateEvent() {
           </div>
         </div>
 
+        {/* Resource Upload Section */}
+        <div style={{ marginBottom: '2rem' }}>
+          <label style={{ display: 'block', marginBottom: '0.5rem', color: '#4A5568' }}>
+            Event Resources (PDF files)
+          </label>
+          <div style={{ 
+            border: '2px dashed #CBD5E0', 
+            borderRadius: '0.5rem',
+            padding: '1.5rem',
+            textAlign: 'center',
+            marginBottom: '1rem'
+          }}>
+            <FaFileUpload style={{ fontSize: '2rem', color: '#718096', marginBottom: '0.5rem' }} />
+            <p style={{ color: '#718096', marginBottom: '1rem' }}>Upload PDF resources for your event</p>
+            <input
+              type="file"
+              accept=".pdf"
+              multiple
+              onChange={handleFileChange}
+              style={{ display: 'none' }}
+              id="resource-upload"
+            />
+            <label 
+              htmlFor="resource-upload"
+              style={{
+                display: 'inline-block',
+                padding: '0.5rem 1rem',
+                backgroundColor: '#4299E1',
+                color: 'white',
+                borderRadius: '0.375rem',
+                cursor: 'pointer',
+                transition: 'background-color 0.2s'
+              }}
+            >
+              Select Files
+            </label>
+          </div>
+          
+          {/* Display selected files */}
+          {resources.length > 0 && (
+            <div style={{ marginTop: '1rem' }}>
+              <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem', color: '#4A5568' }}>Selected Files:</h3>
+              <ul style={{ listStyle: 'none', padding: 0 }}>
+                {resources.map((file, index) => (
+                  <li 
+                    key={index}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '0.5rem',
+                      backgroundColor: '#F7FAFC',
+                      borderRadius: '0.375rem',
+                      marginBottom: '0.5rem'
+                    }}
+                  >
+                    <span style={{ color: '#4A5568' }}>{file.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeResource(index)}
+                      style={{
+                        backgroundColor: '#F56565',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '0.25rem',
+                        padding: '0.25rem 0.5rem',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Remove
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || uploadingResources}
           style={{
             width: '100%',
             padding: '0.75rem',
-            backgroundColor: '#4F46E5',
+            backgroundColor: loading || uploadingResources ? '#A0AEC0' : '#4299E1',
             color: 'white',
-            borderRadius: '0.375rem',
             border: 'none',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.7 : 1,
+            borderRadius: '0.375rem',
+            cursor: loading || uploadingResources ? 'not-allowed' : 'pointer',
+            fontSize: '1rem',
+            fontWeight: 'bold'
           }}
         >
-          {loading ? 'Creating Event...' : 'Create Event'}
+          {loading ? 'Creating Event...' : uploadingResources ? 'Uploading Resources...' : 'Create Event'}
         </button>
       </form>
     </div>
   );
-};
+}
 
