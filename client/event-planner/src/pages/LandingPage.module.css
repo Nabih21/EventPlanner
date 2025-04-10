@@ -506,6 +506,34 @@
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
+.eventDetailsCard button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.eventDetailsCard button svg {
+  font-size: 1.2rem;
+}
+
+.eventDetailsCard h3 {
+  color: #2b5876;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+.eventDetailsInfo {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.loadingContainer svg {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
 /* Responsive Styles */
 @media (max-width: 1024px) {
   .hero {
@@ -557,4 +585,4 @@
   .eventDetailsInfo {
     grid-template-columns: 1fr;
   }
-} 
+}

@@ -49,7 +49,7 @@ const Navbar = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            EventPlanner
+            TIME Is Managing Events
           </motion.span>
         </Link>
 

@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { motion, AnimatePresence } from "framer-motion";
+import { FaSearch, FaFilter, FaSpinner } from "react-icons/fa";
 import EventCard from "../components/EventCard";
+import styles from "./LandingPage.module.css";
 
 const EventOrganizer = () => {
   const [organizerEvents, setOrganizerEvents] = useState([]);
@@ -10,10 +13,9 @@ const EventOrganizer = () => {
   useEffect(() => {
     const fetchOrganizerEvents = async () => {
       try {
-        // This endpoint needs to be implemented in the backend
         const response = await axios.get("http://localhost:3001/manage/organizerEvents", {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}` // Assuming token-based auth
+            Authorization: `Bearer ${localStorage.getItem('token')}`
           }
         });
         setOrganizerEvents(response.data.Events || []);
@@ -33,54 +35,94 @@ const EventOrganizer = () => {
     return matchesSearch && matchesStatus;
   });
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { 
+        duration: 0.5,
+        when: "beforeChildren",
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { 
+      y: 0, 
+      opacity: 1,
+      transition: { type: "spring", stiffness: 300, damping: 24 }
+    }
+  };
+
   return (
-    <div style={{ padding: "1rem" }}>
-      <h1>My Organized Events</h1>
+    <motion.div 
+      className={styles.landingContainer}
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+      style={{ paddingTop: '80px' }}
+    >
+      <div className={styles.hero} style={{ minHeight: "30vh", padding: "2rem 5%" }}>
+        <motion.div className={styles.heroContent} variants={itemVariants}>
+          <h1 className={styles.title}>My Organized Events</h1>
+          <p className={styles.subtitle}>
+            Manage and oversee all the events you're organizing
+          </p>
+          
+          <div className={styles.searchContainer}>
+            <div className={styles.searchBar}>
+              <FaSearch className={styles.searchIcon} />
+              <input
+                type="text"
+                placeholder="Search your events..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className={styles.searchInput}
+              />
+            </div>
+            
+            <div className={styles.filterContainer}>
+              <FaFilter className={styles.filterIcon} />
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className={styles.filterSelect}
+              >
+                <option value="">All Statuses</option>
+                <option value="planned">Planned</option>
+                <option value="in progress">In Progress</option>
+                <option value="finished">Finished</option>
+                <option value="past">Past</option>
+              </select>
+            </div>
+          </div>
+        </motion.div>
+      </div>
 
-      <div style={{ marginBottom: "1rem" }}>
-        <input
-          type="text"
-          placeholder="Search events..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          style={{ marginRight: "1rem" }}
-        />
-
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
+      <div className={styles.features} style={{ padding: "2rem 5%" }}>
+        <motion.div 
+          className={styles.eventGrid}
+          variants={containerVariants}
         >
-          <option value="">All Statuses</option>
-          <option value="planned">Planned</option>
-          <option value="in progress">In Progress</option>
-          <option value="finished">Finished</option>
-          <option value="past">Past</option>
-        </select>
+          {filteredEvents.map((event) => (
+            <motion.div
+              key={event._id}
+              variants={itemVariants}
+              whileHover={{ y: -5, boxShadow: "0 20px 40px rgba(0, 0, 0, 0.1)" }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            >
+              <EventCard 
+                event={event}
+                isOrganizer={true}
+                link={`/organizer/events/${event._id}`}
+              />
+            </motion.div>
+          ))}
+        </motion.div>
       </div>
-
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "1rem",
-        }}
-      >
-        {filteredEvents.map((event) => (
-          <EventCard 
-            key={event._id} 
-            event={event}
-            isOrganizer={true} // This prop can be used to show organizer-specific options
-            link={`/organizer/events/${event._id}`} // Link to OrganizerEventDetails
-          />
-        ))}
-      </div>
-
-      {/* Placeholder for future features */}
-      <div style={{ marginTop: "2rem" }}>
-        {/* User Management component will go here */}
-        {/* Event Editing component will go here */}
-      </div>
-    </div>
+    </motion.div>
   );
 };
 
