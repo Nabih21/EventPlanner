@@ -13,6 +13,7 @@ import { hashPassword, verifyPassword } from '../service/password.js';
 
 
 const router = express.Router();
+console.log("✅ Users router loaded");
 
 router.post('/register', async (req, res) => {
     const { username, password } = req.body;
@@ -103,6 +104,28 @@ router.get('/viewUser/:id', async (req, res) => {
 
 });
 
+router.get('/getUser', getUserFromJwtToken, async (req, res) => {
+    try {
+        console.log("Backend user:",req.user.username);
+        const user = await UserModel.findById(req.user.userID);
+        
+        if (!user) {
+            return res.status(404).json({ 
+                Error: 'User not found'
+            });
+        }
+
+        return res.status(200).json({ 
+            message: 'User data retrieved successfully',
+            User: user
+        });
+    } catch (error) {
+        return res.status(500).json({ 
+            Error: "Error retrieving user data",
+            Details: error.message
+        });
+    }
+});
 
 router.post('/sendFriendRequest/:id', getUserFromJwtToken, async (req, res) => {
     const {id} = req.params
