@@ -59,7 +59,7 @@ const EventCard = ({ event }) => {
       }}>
         {/* You can replace this placeholder with a real image URL if your event has one */}
         <img
-          src="https://source.unsplash.com/random/800x600/?event,party"
+          src= {event.picture}
           alt={event.name}
           style={{ 
             width: '100%', 

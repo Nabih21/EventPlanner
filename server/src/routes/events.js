@@ -9,7 +9,7 @@ import { getUserFromJwtToken } from '../middleware/auth.js';
 const router = express.Router();
 
 router.post('/createEvent', getUserFromJwtToken, async (req, res) => {
-    const { name, location, description, start_date, end_date, status} = req.body;
+    const { name, location, description, start_date, end_date, status, resources, venues, picture} = req.body;
 
     /* Maybe create code that checks for event time conflict in exact same location?
   
@@ -18,16 +18,25 @@ router.post('/createEvent', getUserFromJwtToken, async (req, res) => {
     if(!name || !description || !location || !start_date || !end_date){
         return res.status(400).json({ Error: 'Bad Input, missing data' });
     }
-
-    let newEvent = new EventModel({
-        name,
-        location,
-        description,
-        start_date,
-        end_date,
-        status
-    })
-    newEvent = await newEvent.save()
+    let newEvent;
+    try{
+        newEvent = new EventModel({
+            name,
+            location,
+            description,
+            start_date,
+            end_date,
+            status,
+            resources,
+            venues,
+            picture
+        })
+        newEvent = await newEvent.save()
+    }
+    catch(error){
+        return res.status(400).json({ Error: error
+         });
+    }
     const userID = req.user.userID
     const newTicket = new TicketModel({
         EventID: newEvent._id,
@@ -42,6 +51,48 @@ router.post('/createEvent', getUserFromJwtToken, async (req, res) => {
 
 });
 
+router.patch('/editEvent/:_id', getUserFromJwtToken, async (req, res) => {
+
+    const _id = req.params
+    let Event;
+
+    try{
+        Event = await EventModel.findById(_id)
+    }
+    catch(error) {
+        return res.status(400).json({ 
+         Error: "id provided is invalid"
+         });
+    }
+     if(!Event){
+         return res.status(400).json({ 
+             message: 'Sorry, no event with that id'
+          });
+     }
+
+     if(req.body.promoted != null){
+        return res.status(400).json({ 
+            message: "You must pay to promote event",
+         });
+     }
+
+    const userEventCheck = await TicketModel.find({EventID: _id, UserID: req.user.userID, role: "organizer"}) 
+
+    if(userEventCheck.length > 0){
+
+        
+        await EventModel.findOneAndUpdate({ _id: _id }, 
+            req.body,)  
+
+        return res.status(200).json({ 
+            message: 'Event details successfully edited',
+        });
+    }
+    return res.status(400).json({ 
+        message: 'Only event organizer can edit Event details',
+     });
+
+});
 
 router.get('/viewEvents', async (req, res) => {
 

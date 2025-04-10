@@ -38,6 +38,10 @@ const eventSchema = new mongoose.Schema({
     promoted: {
         type: Boolean,
         default: false
+    },
+    picture: {
+        type: String,
+        default: "https://static.thenounproject.com/png/4595376-200.png"
     }
 });
 
