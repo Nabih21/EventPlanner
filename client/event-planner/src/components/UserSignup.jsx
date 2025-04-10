@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { authService } from '../services/api';
+import { FaUser, FaLock, FaSpinner } from 'react-icons/fa';
 
 const UserSignup = ({ switchToLogin }) => {
   const [formData, setFormData] = useState({
@@ -7,7 +8,6 @@ const UserSignup = ({ switchToLogin }) => {
     password: '',
     confirmPassword: ''
   });
-  
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({
     username: false,
@@ -15,51 +15,68 @@ const UserSignup = ({ switchToLogin }) => {
     confirmPassword: false
   });
   const [formValid, setFormValid] = useState(false);
-  const [passwordStrength, setPasswordStrength] = useState('');
   const [loading, setLoading] = useState(false);
-  
-  // Validate form on input change
+  const [passwordStrength, setPasswordStrength] = useState({
+    score: 0,
+    label: ''
+  });
+
+  // Validate form on every input change
   useEffect(() => {
     validateForm();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData]);
 
+  // Check if form is valid to enable/disable submit button
+  useEffect(() => {
+    const isFormValid = 
+      formData.username.trim() !== '' && 
+      formData.password.trim() !== '' &&
+      formData.confirmPassword.trim() !== '' &&
+      formData.password === formData.confirmPassword &&
+      Object.keys(errors).length === 0;
+    
+    setFormValid(isFormValid);
+  }, [formData, errors]);
+
   // Calculate password strength
   useEffect(() => {
-    if (!formData.password) {
-      setPasswordStrength('');
-      return;
-    }
-    
-    // Simple password strength calculation
-    const hasLength = formData.password.length >= 8;
-    const hasLowerCase = /[a-z]/.test(formData.password);
-    const hasUpperCase = /[A-Z]/.test(formData.password);
-    const hasNumber = /\d/.test(formData.password);
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(formData.password);
-    
-    const strengthScore = [hasLength, hasLowerCase, hasUpperCase, hasNumber, hasSpecialChar].filter(Boolean).length;
-    
-    if (strengthScore <= 2) {
-      setPasswordStrength('weak');
-    } else if (strengthScore === 3) {
-      setPasswordStrength('fair');
-    } else if (strengthScore === 4) {
-      setPasswordStrength('good');
+    if (formData.password) {
+      const strength = calculatePasswordStrength(formData.password);
+      setPasswordStrength(strength);
     } else {
-      setPasswordStrength('strong');
+      setPasswordStrength({ score: 0, label: '' });
     }
   }, [formData.password]);
 
-  // Check if all required fields are valid
-  useEffect(() => {
-    const formValid = 
-      formData.username.trim() !== '' && 
-      formData.password.length >= 6 &&
-      formData.password === formData.confirmPassword;
+  const calculatePasswordStrength = (password) => {
+    let score = 0;
     
-    setFormValid(formValid);
-  }, [formData]);
+    // Length check
+    if (password.length >= 8) score++;
+    
+    // Contains number
+    if (/\d/.test(password)) score++;
+    
+    // Contains lowercase
+    if (/[a-z]/.test(password)) score++;
+    
+    // Contains uppercase
+    if (/[A-Z]/.test(password)) score++;
+    
+    // Contains special character
+    if (/[^A-Za-z0-9]/.test(password)) score++;
+    
+    let label = '';
+    if (score === 0) label = 'Very Weak';
+    else if (score === 1) label = 'Weak';
+    else if (score === 2) label = 'Fair';
+    else if (score === 3) label = 'Good';
+    else if (score === 4) label = 'Strong';
+    else label = 'Very Strong';
+    
+    return { score, label };
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -87,21 +104,15 @@ const UserSignup = ({ switchToLogin }) => {
     }
     
     // Password validation
-    if (touched.password) {
-      if (!formData.password) {
-        newErrors.password = 'Password is required';
-      } else if (formData.password.length < 6) {
-        newErrors.password = 'Password must be at least 6 characters';
-      }
+    if (touched.password && !formData.password) {
+      newErrors.password = 'Password is required';
     }
     
     // Confirm password validation
-    if (touched.confirmPassword) {
-      if (!formData.confirmPassword) {
-        newErrors.confirmPassword = 'Please confirm your password';
-      } else if (formData.password !== formData.confirmPassword) {
-        newErrors.confirmPassword = 'Passwords do not match';
-      }
+    if (touched.confirmPassword && !formData.confirmPassword) {
+      newErrors.confirmPassword = 'Please confirm your password';
+    } else if (touched.confirmPassword && formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
     }
     
     setErrors(newErrors);
@@ -112,13 +123,11 @@ const UserSignup = ({ switchToLogin }) => {
     e.preventDefault();
     
     // Mark all fields as touched to show validation errors
-    const newTouched = {
+    setTouched({
       username: true,
       password: true,
       confirmPassword: true
-    };
-    
-    setTouched(newTouched);
+    });
     
     if (validateForm()) {
       try {
@@ -126,22 +135,20 @@ const UserSignup = ({ switchToLogin }) => {
         setErrors({});
         
         // Use the authService to register
-        const response = await authService.register(formData);
+        const response = await authService.register({
+          username: formData.username,
+          password: formData.password,
+          role: 'user'
+        });
         
-        if (response.message === 'User already exists') {
-          setErrors({ form: 'Username already taken. Please choose a different username.' });
-          return;
-        }
-        
-        if (response.message === 'User registered successfully') {
-          // Show success message and redirect to login
-          alert('Registration successful! Please log in with your new account.');
+        if (response.success) {
+          // Redirect to login page
           switchToLogin();
         } else {
-          setErrors({ form: 'Registration failed. Please try again.' });
+          setErrors({ form: response.message || 'Registration failed. Please try again.' });
         }
       } catch (error) {
-        console.error('Signup failed:', error);
+        console.error('Registration failed:', error);
         setErrors({ 
           form: 'Registration failed. Please try again later.'
         });
@@ -155,35 +162,24 @@ const UserSignup = ({ switchToLogin }) => {
     return touched[fieldName] && errors[fieldName] ? 'error' : '';
   };
 
-  // Password strength indicator
-  const renderPasswordStrength = () => {
-    if (!formData.password || !touched.password) return null;
-    
-    const strengthLabels = {
-      'weak': 'Weak',
-      'fair': 'Fair',
-      'good': 'Good',
-      'strong': 'Strong'
-    };
-    
-    return (
-      <div className="password-strength">
-        <div className="password-strength-meter">
-          <div className={`strength-${passwordStrength}`}></div>
-        </div>
-        <p>Password strength: {strengthLabels[passwordStrength]}</p>
-      </div>
-    );
+  const getPasswordStrengthClass = () => {
+    if (passwordStrength.score === 0) return '';
+    if (passwordStrength.score === 1) return 'strength-weak';
+    if (passwordStrength.score === 2) return 'strength-fair';
+    if (passwordStrength.score === 3) return 'strength-good';
+    if (passwordStrength.score === 4) return 'strength-strong';
+    return 'strength-very-strong';
   };
 
   return (
     <div className="auth-form-container">
-      <h2>Create Account</h2>
       <form onSubmit={handleSubmit} className="auth-form">
         {errors.form && <div className="error-message">{errors.form}</div>}
         
         <div className="form-field">
-          <label htmlFor="username">Username</label>
+          <label htmlFor="username">
+            <FaUser className="input-icon" /> Username
+          </label>
           <input
             type="text"
             id="username"
@@ -197,13 +193,15 @@ const UserSignup = ({ switchToLogin }) => {
           />
           {touched.username && errors.username ? (
             <div className="error-message">{errors.username}</div>
-          ) : touched.username && formData.username ? (
+          ) : touched.username && formData.username && !errors.username ? (
             <div className="valid-message">Username is valid</div>
           ) : null}
         </div>
         
         <div className="form-field">
-          <label htmlFor="password">Password</label>
+          <label htmlFor="password">
+            <FaLock className="input-icon" /> Password
+          </label>
           <input
             type="password"
             id="password"
@@ -211,18 +209,30 @@ const UserSignup = ({ switchToLogin }) => {
             value={formData.password}
             onChange={handleChange}
             onBlur={handleBlur}
-            placeholder="Enter your password"
+            placeholder="Create a password"
             className={getInputClassName('password')}
             required
           />
           {touched.password && errors.password ? (
             <div className="error-message">{errors.password}</div>
+          ) : touched.password && formData.password && !errors.password ? (
+            <div className="valid-message">Password is valid</div>
           ) : null}
-          {renderPasswordStrength()}
+          
+          {formData.password && (
+            <div className="password-strength">
+              <div className="password-strength-meter">
+                <div className={getPasswordStrengthClass()} style={{ width: `${passwordStrength.score * 20}%` }}></div>
+              </div>
+              <p>Strength: {passwordStrength.label}</p>
+            </div>
+          )}
         </div>
         
         <div className="form-field">
-          <label htmlFor="confirmPassword">Confirm Password</label>
+          <label htmlFor="confirmPassword">
+            <FaLock className="input-icon" /> Confirm Password
+          </label>
           <input
             type="password"
             id="confirmPassword"
@@ -236,7 +246,7 @@ const UserSignup = ({ switchToLogin }) => {
           />
           {touched.confirmPassword && errors.confirmPassword ? (
             <div className="error-message">{errors.confirmPassword}</div>
-          ) : touched.confirmPassword && formData.confirmPassword && formData.password === formData.confirmPassword ? (
+          ) : touched.confirmPassword && formData.confirmPassword && !errors.confirmPassword ? (
             <div className="valid-message">Passwords match</div>
           ) : null}
         </div>
@@ -246,7 +256,13 @@ const UserSignup = ({ switchToLogin }) => {
           className="submit-button"
           disabled={!formValid || loading}
         >
-          {loading ? 'Creating Account...' : 'Create Account'}
+          {loading ? (
+            <>
+              <FaSpinner className="spinner-icon" /> Creating Account...
+            </>
+          ) : (
+            'Create Account'
+          )}
         </button>
       </form>
       
@@ -255,7 +271,7 @@ const UserSignup = ({ switchToLogin }) => {
           onClick={switchToLogin} 
           className="link-button"
         >
-          Already have an account? Login
+          Already have an account? Sign In
         </button>
       </div>
     </div>
