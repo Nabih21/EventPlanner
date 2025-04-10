@@ -9,6 +9,23 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true
+    },
+    profilePicture:{
+        type: String,
+        required: true,
+        default: "https://static-00.iconduck.com/assets.00/avatar-default-symbolic-icon-1920x2048-qj0yfpqi.png"
+    },
+    socialMediaLink:{
+        type: String,
+        required: false
+    },
+    contactInfo:{
+        type: String,
+        required: false
+    },
+    personalDescription:{
+        type: String,
+        required: false
     }
 
     // maybe users should have name, email, role, and type as required variables and other variables such as organization (For attendees) and rating (For speaker) as not required.
