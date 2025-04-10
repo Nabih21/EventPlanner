@@ -114,6 +114,20 @@ useEffect(() => {
               </motion.span>
             </Link>
           ))}
+
+        <div className={styles.desktopNav}>
+          {user != null  && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}> 
+                      <FaUserCircle size={30} color="#2b5876" />
+                        <span>
+                          Hi {user.username} 
+                          </span>
+                      </div> 
+                    )  }
+
+        </div>
+
+
           <motion.div
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
