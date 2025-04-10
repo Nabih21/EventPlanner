@@ -147,9 +147,9 @@ router.patch('/promoteEvent/:_id', getUserFromJwtToken, async (req, res) => {
 
 router.patch('/getTicket/:id', getUserFromJwtToken, async (req, res) => {
 
-    const {id} =req.params
-    const Event = await EventModel.findById(id) 
-
+    const {id} =req.params;
+    const Event = await EventModel.findById(id) ;
+    
     if(!Event){
         return res.status(400).json({ Error: 'Event Not found' });
     }
