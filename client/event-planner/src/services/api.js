@@ -87,4 +87,45 @@ export const eventService = {
   }
 };
 
+// Ticket services
+export const ticketService = {
+  createTicket: async (ticketData) => {
+    const response = await api.post('/manage/createTicket', ticketData);
+    return response.data;
+  },
+
+  getTickets: async () => {
+    const response = await api.get('/manage/viewTickets');
+    return response.data;
+  },
+
+  getUserTickets: async () => {
+    const response = await api.get('/auth/viewTickets');
+    return response.data;
+  }
+};
+
+// Veniue services
+export const venueService = {
+  createVenue: async (venueData) => {
+    const response = await api.post('/venues/createVenue', venueData);
+    return response.data;
+  },
+
+  getVenues: async () => {
+    const response = await api.get('/venues/viewVenues');
+    return response.data;
+  },
+
+  editVenue: async (id, venueData) => {
+    const response = await api.patch(`/venues/editVenue/${id}`, venueData);
+    return response.data;
+  },
+
+  deleteVenue: async (id) => {
+    const response = await api.delete(`/venues/deleteVenue/${id}`);
+    return response.data;
+  }
+};
+
 export default api;
