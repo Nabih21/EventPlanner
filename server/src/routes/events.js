@@ -1,10 +1,12 @@
 import express from 'express';
 import { EventModel } from '../models/Events.js';
 import { UserModel } from '../models/Users.js';
+import { getUserFromJwtToken } from '../middleware/auth.js';
+
 
 const router = express.Router();
 
-router.post('/createEvent', async (req, res) => {
+router.post('/createEvent', getUserFromJwtToken, async (req, res) => {
     const { name, location, description, start_date, end_date, status} = req.body;
 
     /* Maybe create code that checks for event time conflict in exact same location?
@@ -15,13 +17,21 @@ router.post('/createEvent', async (req, res) => {
         return res.status(400).json({ Error: 'Bad Input, missing data' });
     }
 
+
+    const attendeeObj = [{
+        username: req.user.username,
+        role: "organizer"
+      }]
+
+    console.log(attendeeObj)
     const newEvent = new EventModel({
         name,
         location,
         description,
         start_date,
         end_date,
-        status
+        status,
+        attendees: attendeeObj
     })
     await newEvent.save();
 
@@ -62,10 +72,10 @@ router.get('/showPromotedEvents', async (req, res) => {
 });
 
 
-router.patch('/promoteEvent/:_id', async (req, res) => {
+router.patch('/promoteEvent/:_id', getUserFromJwtToken, async (req, res) => {
 
-     const _id = req.params
-     let Event;
+    const _id = req.params
+    let Event;
 
     try{
         Event = await EventModel.findById(_id)
@@ -115,7 +125,7 @@ router.patch('/promoteEvent/:_id', async (req, res) => {
 
 });
 
-router.patch('/getTicket/:id', async (req, res) => {
+router.patch('/getTicket/:id', getUserFromJwtToken, async (req, res) => {
 
     const {id} =req.params
     const Event = await EventModel.findById(id) 
@@ -124,33 +134,16 @@ router.patch('/getTicket/:id', async (req, res) => {
         return res.status(400).json({ Error: 'Event Not found' });
     }
 
-    const {username, role} = req.body;
-
-    if(!username || !role){
-        return res.status(400).json({ Error: 'Bad Input, missing data' });
-    }
-
-    if(role != "attendee"){
-        return res.status(400).json({ Error: 'Bad Input, choose proper role for event. Only Attendee allowed, ' +
-            'organiazers will have to assign other roles' });
-    }
-    
-    const user = await UserModel.findOne({ username: username });
-
-    if(!user){
-        return res.status(400).json({ Error: 'User Not found' });
-    }
-
     const attendeeObj = {
-        username: username,
-        role: role
+        username: req.user.username,
+        role: "attendee"
       }
     const newAttendees = Event.attendees
     
 
     for(let i = 0; i < newAttendees.length; i++){
 
-        if(username == newAttendees[i].username){
+        if(req.user.username == newAttendees[i].username){
             return res.status(400).json({ 
                 message: 'User already registered to event'
              });
@@ -159,7 +152,7 @@ router.patch('/getTicket/:id', async (req, res) => {
 
     newAttendees.push(attendeeObj)
 
-    await EventModel.findOneAndUpdate({_id: id}, {"attendees": newAttendees})
+    await EventModel.findOneAndUpdate({_id: id}, {attendees: newAttendees})
 
     return res.status(200).json({ 
         message: 'User registered to event successfully'
@@ -195,12 +188,12 @@ router.get('/viewEvent/:id', async (req, res) => {
 
       
       
-router.delete('/deleteEvent/:id', async (req, res) => {
+router.delete('/deleteEvent/:id', getUserFromJwtToken, async (req, res) => {
 
     const {id} =req.params
     let Event
     try{
-    Event = await EventModel.findByIdAndDelete(id) // maybe add a check to see id person deleting is organizer of event or not
+    Event = await EventModel.findById(id) // maybe add a check to see id person deleting is organizer of event or not
     }
     catch(error) {
         return res.status(400).json({ 
@@ -213,8 +206,95 @@ router.delete('/deleteEvent/:id', async (req, res) => {
          });
     }
 
-    return res.status(200).json({ 
-        message: 'Event deleted successfully'
+    for(let i = 0; i < Event.attendees.length; i++){
+
+        if(req.user.username == Event.attendees[i].username){
+            if(Event.attendees[i].role == "organizer"){
+                await EventModel.findByIdAndDelete(id)
+                return res.status(200).json({ 
+                    message: 'Event deleted successfully'
+                });
+            }
+            return res.status(400).json({ 
+                    message: 'You are not this events organizer. Only an organizer can delete the event'
+                });
+        }
+    }
+
+
+    return res.status(400).json({ 
+        message: 'Shouldnt even be able to see this option :C. You are not this events organizer. Only an organizer can delete the event'
+     });
+
+});
+
+
+router.patch('/inviteToEvent/:id', getUserFromJwtToken, async (req, res) => {
+
+    const {id} =req.params
+    let Event
+    try{
+    Event = await EventModel.findById(id)
+    }
+    catch(error) {
+        return res.status(400).json({ 
+            Error: "id provided is invalid"
+         });
+    }
+    if(!Event){
+        return res.status(400).json({ 
+            Error: 'No Event with such ID'
+         });
+    }
+
+    const {username, role} = req.body
+
+    if(!username || !role || (role != "organizer" && role != "stakeholder" && role != "speaker" && role != "attendee")){
+        return res.status(400).json({ Error: 'Bad Input, missing / incorrect data' });
+    }
+
+    const user = await UserModel.findOne({ username: username });
+
+    if ( !user) {
+        return res.json({ message: 'Attempted user to invite is non-existent' });
+    }
+
+
+
+    for(let i = 0; i < Event.attendees.length; i++){
+        if(username == Event.attendees[i].username){
+            return res.status(400).json({ 
+                message: 'User already registered to event'
+             });
+        }
+    } 
+    for(let i = 0; i < Event.attendees.length; i++){
+
+        if(req.user.username == Event.attendees[i].username){
+            
+            if(Event.attendees[i].role == "organizer"){
+                const newAttendees = Event.attendees
+
+                const attendeeObj = {
+                    username: username,
+                    role: role
+                  }
+
+                newAttendees.push(attendeeObj)
+                await EventModel.findOneAndUpdate({_id: id}, {attendees: newAttendees})
+            
+                return res.status(200).json({ 
+                  message: 'User registered to event successfully'
+               });
+            }
+            return res.status(400).json({ 
+                    message: 'You are not this events organizer. Only an organizer can invite others to the event'
+            });
+        }
+    }
+
+    return res.status(400).json({ 
+        message: 'You are not this events organizer. Only an organizer can invite others to the event'
      });
 
 });
