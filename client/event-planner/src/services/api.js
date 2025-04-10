@@ -82,7 +82,7 @@ export const eventService = {
   },
 
   getTicket: async (id) => {
-    const response = await api.patch(`/manage/getTicket/${id}`);
+    const response = await api.post(`/manage/getTicket/${id}`);
     return response.data;
   }
 };
