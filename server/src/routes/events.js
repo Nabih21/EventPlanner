@@ -168,6 +168,38 @@ router.get('/viewEvent/:id', async (req, res) => {
 
 });
 
+router.get('/viewEventAttendees/:id', getUserFromJwtToken, async (req, res) => {
+
+    const {id} =req.params
+    let Event
+    try{
+    Event = await EventModel.findById(id)
+    }
+    catch(error) {
+        return res.status(400).json({ 
+            Error: "id provided is invalid"
+         });
+    }
+    if(!Event){
+        return res.status(400).json({ 
+            Error: 'No Event with such ID'
+         });
+    }
+
+    const userEventCheck = await TicketModel.find({EventID: id, UserID: req.user.userID, role: "organizer"}) 
+
+    if(userEventCheck.length > 0){
+        const eventTickets =  await TicketModel.find({EventID: id})
+        return res.status(200).json({ 
+            message: 'Event attendees successfully returned',
+            eventTickets
+        });
+    }
+    return res.status(400).json({ 
+        message: 'Only event organizer can view Event attendees',
+     });
+
+});
       
       
 router.delete('/deleteEvent/:id', getUserFromJwtToken, async (req, res) => {

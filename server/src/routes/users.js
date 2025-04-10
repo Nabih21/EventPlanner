@@ -1,9 +1,12 @@
 import express from 'express';
 import { UserModel } from '../models/Users.js';
+import { TicketModel } from '../models/Tickets.js';
+import { getUserFromJwtToken } from '../middleware/auth.js';
+
 
 
 // Services
-import { generateToken, verifyToken } from '../service/jwt.js';
+import { generateToken} from '../service/jwt.js';
 import { hashPassword, verifyPassword } from '../service/password.js';
 
 
@@ -48,6 +51,17 @@ router.post('/login', async (req, res) => {
 
     const token = generateToken({userID: user._id, username: user.username}) ;
     res.json({token, userID: user._id, username: user.username});
+
+});
+
+router.get('/viewTickets', getUserFromJwtToken, async (req, res) => {
+
+    const tickets = await TicketModel.find({UserID: req.user.userID}) 
+
+    return res.status(200).json({ 
+        message: 'Here are your tickets',
+        Tickets: tickets
+     });
 
 });
 
