@@ -215,7 +215,7 @@ const EventDetails = () => {
     // Check if slider has reached the end (payment confirmation)
     if (newPosition >= maxSlideWidth - sliderRect.width - 10) {
       setSliderPosition(maxSlideWidth - sliderRect.width);
-      handlePaymentSubmit();
+     // handlePaymentSubmit();
     }
   };
   
@@ -263,7 +263,7 @@ const EventDetails = () => {
     // Check if slider has reached the end (payment confirmation)
     if (newPosition >= maxSlideWidth - sliderRect.width - 10) {
       setSliderPosition(maxSlideWidth - sliderRect.width);
-      handlePaymentSubmit();
+      //handlePaymentSubmit();
     }
   };
   
@@ -715,30 +715,12 @@ const EventDetails = () => {
                     
                     {/* Slide to Pay */}
                     <div style={{ marginTop: "1.5rem" }}>
-                      <p
-                        style={{
-                          color: "#4a5568",
-                          marginBottom: "0.75rem",
-                          fontSize: "0.875rem",
-                          fontWeight: "500"
-                        }}
-                      >
-                        Slide to complete payment
-                      </p>
-                      <div
-                        style={{
-                          position: "relative",
-                          height: "50px",
-                          backgroundColor: "#f8fafc",
-                          borderRadius: "25px",
-                          border: "1px solid #e2e8f0",
-                          width: "100%",
-                          maxWidth: "300px"
-                        }}
-                      >
+                    
+
+                        <button onClick={handlePaymentSubmit}> Pay </button> 
                         <div
                           style={{
-                            position: "absolute",
+                            //position: "absolute",
                             top: 0,
                             left: 0,
                             right: 0,
@@ -752,7 +734,7 @@ const EventDetails = () => {
                             pointerEvents: "none"
                           }}
                         >
-                          {isPaying ? "Processing..." : "Slide to Pay"}
+                          {isPaying && "Processing..."}
                         </div>
                         <div
                           ref={sliderRef}
@@ -781,7 +763,7 @@ const EventDetails = () => {
                             <FaArrowLeft style={{ transform: "rotate(180deg)" }} />
                           )}
                         </div>
-                      </div>
+                      
                     </div>
                     
                     {/* Payment Error Message */}
