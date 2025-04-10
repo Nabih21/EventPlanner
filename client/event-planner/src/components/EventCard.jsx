@@ -1,10 +1,10 @@
 // src/components/EventCard.jsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { FaCalendarAlt, FaMapMarkerAlt, FaArrowRight } from "react-icons/fa";
+import { FaCalendarAlt, FaMapMarkerAlt, FaArrowRight, FaCheckCircle } from "react-icons/fa";
 import styles from "../pages/LandingPage.module.css";
 
-const EventCard = ({ event }) => {
+const EventCard = ({ event, isRegistered = false }) => {
   const navigate = useNavigate();
 
   const handleCardClick = () => {
@@ -97,6 +97,28 @@ const EventCard = ({ event }) => {
           {event.status || 'Unknown'}
         </div>
 
+        
+        {isRegistered && (
+          <div style={{
+            position: 'absolute',
+            bottom: '10px',
+            right: '10px',
+            backgroundColor: 'rgba(76, 175, 80, 0.9)',
+            color: 'white',
+            padding: '5px 10px',
+            borderRadius: '20px',
+            fontSize: '0.8rem',
+            fontWeight: 'bold',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '5px',
+            boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
+          }}>
+            <FaCheckCircle /> Registered
+          </div>
+        )}
+
+
         {event.promoted &&
         <div style={{
           position: 'absolute',
@@ -112,6 +134,7 @@ const EventCard = ({ event }) => {
         }}>
           Sponsored
         </div>}
+
       </div>
       
       <div style={{ 

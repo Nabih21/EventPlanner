@@ -49,7 +49,7 @@ export const authService = {
   }
 };
 
-// Events services
+// Event services
 export const eventService = {
   createEvent: async (eventData) => {
     const response = await api.post('/manage/createEvent', eventData);
@@ -58,6 +58,31 @@ export const eventService = {
 
   getEvents: async () => {
     const response = await api.get('/manage/viewEvents');
+    return response.data;
+  },
+
+  getEvent: async (id) => {
+    const response = await api.get(`/manage/viewEvent/${id}`);
+    return response.data;
+  },
+
+  editEvent: async (id, eventData) => {
+    const response = await api.patch(`/manage/editEvent/${id}`, eventData);
+    return response.data;
+  },
+
+  deleteEvent: async (id) => {
+    const response = await api.delete(`/manage/deleteEvent/${id}`);
+    return response.data;
+  },
+
+  promoteEvent: async (id) => {
+    const response = await api.patch(`/manage/promoteEvent/${id}`);
+    return response.data;
+  },
+
+  getTicket: async (id) => {
+    const response = await api.patch(`/manage/getTicket/${id}`);
     return response.data;
   }
 };
