@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
     profilePicture:{
         type: String,
         required: true,
-        default: "https://static-00.iconduck.com/assets.00/avatar-default-symbolic-icon-1920x2048-qj0yfpqi.png"
+        default: "https://marketplace.canva.com/EAE6rOHfH7g/1/0/1600w/canva-happy-birthday-IjsxyFDxkzA.jpg"
     },
     socialMediaLink:{
         type: String,
@@ -25,7 +25,18 @@ const userSchema = new mongoose.Schema({
     },
     personalDescription:{
         type: String,
-        required: false
+        required: false,
+        default: "This is a test. I really enjoy getting to know people and connecting with others. My hobbies include coding and teaching others. Send me a friend Request!"
+    },
+    currentCity:{
+        type: String,
+        required: false,
+        default: "testing"
+    },
+    birthDate:{
+        type: Date,
+        required: false,
+        default: "2003-12-29"
     }
 
     // maybe users should have name, email, role, and type as required variables and other variables such as organization (For attendees) and rating (For speaker) as not required.
