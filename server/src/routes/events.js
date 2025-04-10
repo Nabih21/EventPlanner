@@ -145,7 +145,7 @@ router.patch('/promoteEvent/:_id', getUserFromJwtToken, async (req, res) => {
 
 });
 
-router.patch('/getTicket/:id', getUserFromJwtToken, async (req, res) => {
+router.post('/getTicket/:id', getUserFromJwtToken, async (req, res) => {
 
     const {id} =req.params;
     const Event = await EventModel.findById(id) ;
