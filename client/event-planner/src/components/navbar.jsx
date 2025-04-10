@@ -3,11 +3,20 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { authService } from '../services/api';
 import styles from './Navbar.module.css';
+import axios from 'axios';
+import { FaUserCircle } from 'react-icons/fa';
 
-const Navbar = () => {
+
+
+
+
+
+const Navbar = ({ setUser, user }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [token, setToken] = useState(null);
+  // const [user, setUser] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -17,8 +26,11 @@ const Navbar = () => {
     };
 
     // Check if user is logged in
-    const token = localStorage.getItem('token');
-    setIsLoggedIn(!!token);
+    const token1 = localStorage.getItem('token');
+    console.log("Token from local storage:", token1);
+    setIsLoggedIn(!!token1);
+    setToken(token1);
+    
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -27,6 +39,7 @@ const Navbar = () => {
   const handleLogout = () => {
     authService.logout();
     setIsLoggedIn(false);
+    setUser(null);
     navigate('/');
   };
 
@@ -92,7 +105,7 @@ useEffect(() => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            EventPlanner
+            TIME Is Managing Events
           </motion.span>
         </Link>
 
@@ -142,6 +155,8 @@ useEffect(() => {
               </Link>
             )}
           </motion.div>
+
+        
         </div>
 
         {/* Mobile Menu Button */}
