@@ -10,6 +10,8 @@ import { ticketsRouter } from './routes/tickets.js';
 import { eventsRouter } from './routes/events.js';
 import { venuesRouter } from './routes/venues.js';
 
+import { friendsRouter } from './routes/friends.js';
+
 const app = express();
 
 app.use(express.json());
@@ -19,6 +21,8 @@ app.use('/tickets', ticketsRouter);
 app.use('/auth', usersRouter);
 app.use('/manage', eventsRouter);
 app.use('/venues', venuesRouter);
+app.use('/friends', friendsRouter);
+
 
 mongoose.connect(`mongodb+srv://eventPlannerTeam:${mongoPass}@eventplanner.eujck.mongodb.net/eventplanner?retryWrites=true&w=majority&appName=eventplanner`);
 

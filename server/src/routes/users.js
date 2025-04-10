@@ -1,6 +1,8 @@
 import express from 'express';
 import { UserModel } from '../models/Users.js';
 import { TicketModel } from '../models/Tickets.js';
+import { FriendsModel } from '../models/Friends.js';
+
 import { getUserFromJwtToken } from '../middleware/auth.js';
 
 
@@ -64,6 +66,94 @@ router.get('/viewTickets', getUserFromJwtToken, async (req, res) => {
      });
 
 });
+
+router.get('/viewUsers', async (req, res) => {
+
+    const users = await UserModel.find({}, {password: 0})
+
+    return res.status(200).json({ 
+        message: 'All users',
+        Users: users
+     });
+
+});
+
+
+router.get('/viewUser/:id', async (req, res) => {
+    const {id} = req.params
+    let user
+    
+    try{
+        user = await UserModel.find({_id: id}, {password: 0})
+    }
+    catch(error) {
+        return res.status(400).json({ 
+            Error: "id provided is invalid"
+         });
+    }
+    if(user.length < 1){
+        return res.status(400).json({ 
+            Error: 'No user with such ID'
+         });
+    }
+    return res.status(200).json({ 
+        message: 'User data',
+        User: user
+     });
+
+});
+
+
+router.post('/sendFriendRequest/:id', getUserFromJwtToken, async (req, res) => {
+    const {id} = req.params
+    let user
+    
+    try{
+        user = await UserModel.find({_id: id}, {password: 0})
+    }
+    catch(error) {
+        return res.status(400).json({ 
+            Error: "id provided is invalid"
+         });
+    }
+    if(user.length < 1){
+        return res.status(400).json({ 
+            Error: 'No user with such ID'
+         });
+    }
+
+    if(req.user.username == user[0].username){
+        return res.status(400).json({ 
+            Error: 'Cant send a friend request to yourself'
+         });
+    }
+
+    let Connection = await FriendsModel.find({username1: req.user.username,  username2: user[0].username});
+    if (Connection.length > 0){
+        return res.status(400).json({ 
+            Error: 'Connection between these 2 users Already exists'
+         });
+    }
+    Connection = await FriendsModel.find({username1: user[0].username,  username2: req.user.username});
+    if (Connection.length > 0){
+        return res.status(400).json({ 
+            Error: 'Connection between these 2 users Already exists'
+         });
+    }
+
+    let friendRequest = new FriendsModel({
+        username1: req.user.username,
+        username2: user[0].username
+    })
+    friendRequest = await friendRequest.save();
+
+    return res.status(200).json({ 
+        message: 'Friend Request Sent',
+        friendRequest
+     });
+
+});
+
 
 
 export { router as usersRouter };
