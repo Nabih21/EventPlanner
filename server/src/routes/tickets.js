@@ -1,6 +1,4 @@
 import express from 'express';
-
-const router = express.Router();
 import { TicketModel } from '../models/Tickets.js';
 import { getUserFromJwtToken } from '../middleware/auth.js';
 

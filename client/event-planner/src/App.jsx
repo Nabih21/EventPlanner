@@ -28,7 +28,6 @@ function App() {
   return (
 
     <>
-    <Router>
       <div className="app">
         <Navbar />
         <Routes>
@@ -43,8 +42,7 @@ function App() {
           <Route path="/create-event" element={<CreateEvent />} /> 
         </Routes>
       </div>
-    </Router>
-    {isLogin && <LiveChat/>}
+          {isLogin && <LiveChat/>}
     </>
 
   );

@@ -141,13 +141,9 @@ config();
 
 // Routes
 import { usersRouter } from './routes/users.js';
-import { ticketsRouter } from './routes/tickets.js';
-
 import { eventsRouter } from './routes/events.js';
 import { venuesRouter } from './routes/venues.js';
 import { ticketsRouter } from './routes/tickets.js';
-import { friendsRouter } from './routes/friends.js';
-
 import { friendsRouter } from './routes/friends.js';
 
 const app = express();
