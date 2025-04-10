@@ -1,25 +1,24 @@
-// src/pages/Events.jsx
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaSearch, FaFilter, FaCalendarAlt, FaMapMarkerAlt, FaSpinner } from "react-icons/fa";
-import EventCard from "../components/EventCard";
+import UserCard from "../components/UserCard";
 import styles from "./LandingPage.module.css";
 
-const Events = () => {
-  const [events, setEvents] = useState([]);
+const Users = () => {
+  const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     // Fetch all events from your backend
-    const fetchEvents = async () => {
+    const fetchUsers = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("http://localhost:3001/manage/viewEvents");
-        setEvents(response.data.Events || []);
+        const response = await axios.get("http://localhost:3001/auth/viewUsers");
+        setUsers(response.data.Users || []);
         setError(null);
       } catch (error) {
         console.error("Error fetching events:", error);
@@ -29,21 +28,17 @@ const Events = () => {
       }
     };
 
-    fetchEvents();
+    fetchUsers();
   }, []);
 
   // Filter the events by search term and status
-  const filteredEvents = events.filter((event) => {
+  const filteredUsers = users.filter((user) => {
     // Match name or location or description with searchTerm
     const matchesSearch =
-      event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      event.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (event.description && event.description.toLowerCase().includes(searchTerm.toLowerCase()));
+      user.username.toLowerCase().includes(searchTerm.toLowerCase());
 
     // If statusFilter is empty, it means "show all"
-    const matchesStatus = statusFilter ? event.status === statusFilter : true;
-
-    return matchesSearch && matchesStatus;
+    return matchesSearch;
   });
 
   // Animation variants
@@ -85,9 +80,9 @@ const Events = () => {
           className={styles.heroContent}
           variants={itemVariants}
         >
-          <h1 className={styles.title}>Discover Events</h1>
+          <h1 className={styles.title}>Discover People</h1>
           <p className={styles.subtitle}>
-            Explore our curated collection of upcoming events and find your next adventure.
+            Explore our cuurent User base and make connections!
           </p>
           
           <div className={styles.searchContainer}>
@@ -95,26 +90,11 @@ const Events = () => {
               <FaSearch className={styles.searchIcon} />
               <input
                 type="text"
-                placeholder="Search events by name, location, or description..."
+                placeholder="Search people by username"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className={styles.searchInput}
               />
-            </div>
-            
-            <div className={styles.filterContainer}>
-              <FaFilter className={styles.filterIcon} />
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className={styles.filterSelect}
-              >
-                <option value="">All Statuses</option>
-                <option value="planned">Planned</option>
-                <option value="in progress">In Progress</option>
-                <option value="finished">Finished</option>
-                <option value="past">Past</option>
-              </select>
             </div>
           </div>
         </motion.div>
@@ -142,7 +122,7 @@ const Events = () => {
               Try Again
             </button>
           </motion.div>
-        ) : filteredEvents.length === 0 ? (
+        ) : filteredUsers.length === 0 ? (
           <motion.div 
             className={styles.noEventsContainer}
             variants={itemVariants}
@@ -162,15 +142,15 @@ const Events = () => {
               width: '100%'
             }}
           >
-            {filteredEvents.map((event) => (
+            {filteredUsers.map((user) => (
               <motion.div
-                key={event._id}
+                key={user._id}
                 variants={itemVariants}
                 whileHover={{ y: -5, boxShadow: "0 20px 40px rgba(0, 0, 0, 0.1)" }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 style={{ width: '100%' }}
               >
-                <EventCard event={event} />
+                <UserCard user={user} />
               </motion.div>
             ))}
           </motion.div>
@@ -180,4 +160,4 @@ const Events = () => {
   );
 };
 
-export default Events;
+export default Users;

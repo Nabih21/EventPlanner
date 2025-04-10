@@ -35,6 +35,7 @@ const Navbar = () => {
     { path: '/events', label: 'Events' },
     { path: '/dashboard', label: 'Dashboard' },
     { path: '/venues', label: 'Venues' },
+    { path: '/users', label: 'Other People' },
   ];
 
   return (
