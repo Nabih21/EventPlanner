@@ -45,7 +45,7 @@ router.get('/viewEvents', async (req, res) => {
     /* Maybe create code that checks if event is public or private view (after adding that field in db)
     */
 
-    const Events = await EventModel.find()  // maybe add a check to see if event view field(yet to be added) is type public
+    const Events = await EventModel.find().sort({promoted: -1})  // maybe add a check to see if event view field(yet to be added) is type public
 
     return res.status(200).json({ 
         message: 'Event returned successfully',
@@ -53,24 +53,6 @@ router.get('/viewEvents', async (req, res) => {
      });
 
 });
-
-router.get('/showPromotedEvents', async (req, res) => {
-
-    const Events = await EventModel.find({promoted: true})  
-
-    if(!Events){
-        return res.status(404).json({ 
-            message: 'Sorry, no events promoted currently'
-         });
-    }
-
-    return res.status(200).json({ 
-        message: 'Promoted Events returned successfully',
-        Events
-     });
-
-});
-
 
 router.patch('/promoteEvent/:_id', getUserFromJwtToken, async (req, res) => {
 
