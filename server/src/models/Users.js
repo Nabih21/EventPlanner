@@ -37,6 +37,17 @@ const userSchema = new mongoose.Schema({
         type: Date,
         required: false,
         default: "2003-12-29"
+    },
+    type: {
+        type: String,
+        required: true,
+        default: "in person",
+        enum: ['in person', 'online', 'mixed']
+    },
+    capacity: {
+        type: Number,
+        required: true,
+        default: 100
     }
 
     // maybe users should have name, email, role, and type as required variables and other variables such as organization (For attendees) and rating (For speaker) as not required.

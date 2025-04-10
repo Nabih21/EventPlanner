@@ -6,7 +6,6 @@ const Login = ({ switchToSignup, switchToAdminSignup }) => {
   const [formData, setFormData] = useState({
     username: '',
     password: '',
-    role: 'user' // Default role
   });
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({
@@ -165,19 +164,6 @@ const Login = ({ switchToSignup, switchToAdminSignup }) => {
           ) : touched.password && formData.password ? (
             <div className="valid-message">Password is valid</div>
           ) : null}
-        </div>
-        
-        <div className="form-field">
-          <label htmlFor="role">Login as</label>
-          <select
-            id="role"
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
-          >
-            <option value="user">User</option>
-            <option value="admin">Admin</option>
-          </select>
         </div>
         
         <button 
