@@ -717,7 +717,19 @@ const EventDetails = () => {
                     <div style={{ marginTop: "1.5rem" }}>
                     
 
-                        <button onClick={handlePaymentSubmit}> Pay </button> 
+                        <button
+                        onClick={handlePaymentSubmit} 
+                        style={{
+                          backgroundColor: "#2b5876",
+                          color: "white",
+                          padding: "0.75rem 1.5rem",
+                          border: "none",
+                          borderRadius: "10px",
+                          
+                        }}
+
+                        
+                        > Pay </button> 
                         <div
                           style={{
                             //position: "absolute",
