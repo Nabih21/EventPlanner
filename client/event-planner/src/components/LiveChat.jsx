@@ -1,44 +1,46 @@
+
+
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
-
-// Get user info
-const user = JSON.parse(localStorage.getItem('user'));
-const username = user?.name || 'Anonymous';
-
-const socket = io('http://localhost:3001'); // Adjust if needed
 
 const LiveChat = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
+  const [socket, setSocket] = useState(null);
   const [socketId, setSocketId] = useState('');
+
+  // Get username from localStorage (fallback to Anonymous)
+  const user = JSON.parse(localStorage.getItem('user'));
+  const username = user?.name || 'Anonymous';
 
   const handleToggle = () => setIsOpen(!isOpen);
 
   const handleSend = (e) => {
-    if (e.key === 'Enter' && input.trim() !== '') {
-      const newMessage = {
+    if (e.key === 'Enter' && input.trim() !== '' && socket) {
+      socket.emit('sendMessage', {
         message: input.trim(),
         sender: username,
-        senderId: socket.id,
-      };
-
-      socket.emit('sendMessage', newMessage);
+        senderId: socketId,
+      });
       setInput('');
     }
   };
 
   useEffect(() => {
-    socket.on('connect', () => {
-      setSocketId(socket.id);
+    const newSocket = io('http://localhost:3001');
+    setSocket(newSocket);
+
+    newSocket.on('connect', () => {
+      setSocketId(newSocket.id);
     });
 
-    socket.on('receiveMessage', (data) => {
+    newSocket.on('receiveMessage', (data) => {
       setMessages((prev) => [...prev, data]);
     });
 
     return () => {
-      socket.off('receiveMessage');
+      newSocket.disconnect();
     };
   }, []);
 
