@@ -5,6 +5,8 @@ import { mongoPass } from '../secrets.js';
 import { config } from 'dotenv';
 config();
 import { usersRouter } from './routes/users.js';
+import { ticketsRouter } from './routes/tickets.js';
+
 import { eventsRouter } from './routes/events.js';
 import { venuesRouter } from './routes/venues.js';
 
@@ -13,6 +15,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+app.use('/tickets', ticketsRouter);
 app.use('/auth', usersRouter);
 app.use('/manage', eventsRouter);
 app.use('/venues', venuesRouter);

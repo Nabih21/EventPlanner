@@ -1,6 +1,8 @@
 import express from 'express';
 import { EventModel } from '../models/Events.js';
 import { UserModel } from '../models/Users.js';
+import { TicketModel } from '../models/Tickets.js';
+
 import { getUserFromJwtToken } from '../middleware/auth.js';
 
 
@@ -17,25 +19,26 @@ router.post('/createEvent', getUserFromJwtToken, async (req, res) => {
         return res.status(400).json({ Error: 'Bad Input, missing data' });
     }
 
-
-    const attendeeObj = [{
-        username: req.user.username,
-        role: "organizer"
-      }]
-
-    console.log(attendeeObj)
-    const newEvent = new EventModel({
+    let newEvent = new EventModel({
         name,
         location,
         description,
         start_date,
         end_date,
-        status,
-        attendees: attendeeObj
+        status
     })
-    await newEvent.save();
+    newEvent = await newEvent.save()
+    const userID = req.user.userID
+    const newTicket = new TicketModel({
+        EventID: newEvent._id,
+        UserID: userID,
+        role : "organizer"
+    })
+   await newTicket.save();
 
-    return res.status(200).json({ message: 'Event Created successfully' });
+    return res.status(200).json({ message: 'Event Created successfully',
+        Event: newEvent
+     });
 
 });
 
@@ -115,29 +118,26 @@ router.patch('/getTicket/:id', getUserFromJwtToken, async (req, res) => {
     if(!Event){
         return res.status(400).json({ Error: 'Event Not found' });
     }
-
-    const attendeeObj = {
-        username: req.user.username,
-        role: "attendee"
-      }
-    const newAttendees = Event.attendees
     
+    
+    const userEventCheck = await TicketModel.find({EventID: id, UserID: req.user.userID}) 
 
-    for(let i = 0; i < newAttendees.length; i++){
-
-        if(req.user.username == newAttendees[i].username){
+    if(userEventCheck.length > 0){
             return res.status(400).json({ 
                 message: 'User already registered to event'
              });
-        }
     }
 
-    newAttendees.push(attendeeObj)
-
-    await EventModel.findOneAndUpdate({_id: id}, {attendees: newAttendees})
+    let newTicket = new TicketModel({
+        EventID: id,
+        UserID: req.user.userID,
+        role : "attendee"
+    })
+    newTicket = await newTicket.save();
 
     return res.status(200).json({ 
-        message: 'User registered to event successfully'
+        message: 'User registered to event successfully. Here is your ticket',
+        Ticket: newTicket
      });
 
 });
@@ -188,21 +188,14 @@ router.delete('/deleteEvent/:id', getUserFromJwtToken, async (req, res) => {
          });
     }
 
-    for(let i = 0; i < Event.attendees.length; i++){
+    const userEventCheck = await TicketModel.find({EventID: id, UserID: req.user.userID, role: "organizer"}) 
 
-        if(req.user.username == Event.attendees[i].username){
-            if(Event.attendees[i].role == "organizer"){
-                await EventModel.findByIdAndDelete(id)
-                return res.status(200).json({ 
-                    message: 'Event deleted successfully'
-                });
-            }
-            return res.status(400).json({ 
-                    message: 'You are not this events organizer. Only an organizer can delete the event'
-                });
-        }
+    if(userEventCheck.length > 0){
+        await EventModel.findByIdAndDelete(id)
+        return res.status(200).json({ 
+            message: 'Event deleted successfully'
+        });
     }
-
 
     return res.status(400).json({ 
         message: 'Shouldnt even be able to see this option :C. You are not this events organizer. Only an organizer can delete the event'
@@ -243,41 +236,37 @@ router.patch('/inviteToEvent/:id', getUserFromJwtToken, async (req, res) => {
 
 
 
-    for(let i = 0; i < Event.attendees.length; i++){
-        if(username == Event.attendees[i].username){
+    const organizerEventCheck = await TicketModel.find({EventID: id, UserID: req.user.userID, role: "organizer"}) 
+
+    if(organizerEventCheck.length > 0){
+        const attendeeEventCheck = await TicketModel.find({EventID: id, UserID: user._id}) 
+        if(attendeeEventCheck.length > 0){
             return res.status(400).json({ 
                 message: 'User already registered to event'
              });
         }
-    } 
-    for(let i = 0; i < Event.attendees.length; i++){
-
-        if(req.user.username == Event.attendees[i].username){
-            
-            if(Event.attendees[i].role == "organizer"){
-                const newAttendees = Event.attendees
-
-                const attendeeObj = {
-                    username: username,
-                    role: role
-                  }
-
-                newAttendees.push(attendeeObj)
-                await EventModel.findOneAndUpdate({_id: id}, {attendees: newAttendees})
-            
-                return res.status(200).json({ 
-                  message: 'User registered to event successfully'
-               });
-            }
-            return res.status(400).json({ 
-                    message: 'You are not this events organizer. Only an organizer can invite others to the event'
-            });
+        else{
+            let newTicket = new TicketModel({
+                EventID: id,
+                UserID: user._id,
+                role : role
+            })
+            newTicket = await newTicket.save();
+        
+            return res.status(200).json({ 
+                message: 'User invited to event successfully. Here is their ticket',
+                Ticket: newTicket
+             });
         }
+    
+    }
+    else{
+        return res.status(400).json({ 
+            message: 'You are not this events organizer. Only an organizer can invite others to the event'
+        });
     }
 
-    return res.status(400).json({ 
-        message: 'You are not this events organizer. Only an organizer can invite others to the event'
-     });
+
 
 });
 
