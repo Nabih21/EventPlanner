@@ -29,7 +29,7 @@ const UserDetails = () => {
         const response = await axios.get(`http://localhost:3001/auth/viewUser/${id}`);
         console.log("Single user response:", response.data.User[0]); 
         setUser(response.data.User[0]);
-        console.log(user.profilePicture)
+
         setError(null);
       } catch (error) {
         console.error("Error fetching single User:", error);
