@@ -5,7 +5,9 @@ import { MdEventAvailable, MdSecurity, MdSpeed } from 'react-icons/md';
 import { BsArrowRight } from 'react-icons/bs';
 import styles from './LandingPage.module.css';
 
-const LandingPage = () => {
+const LandingPage = ({ user }) => {
+
+  console.log("User in LandingPage:", user);
   return (
     <div className={styles.landingContainer}>
       {/* Hero Section */}
@@ -17,10 +19,15 @@ const LandingPage = () => {
           <p className={styles.subtitle}>
             Streamline your educational events with our comprehensive management platform
           </p>
+          { user == null && (
+
           <div className={styles.ctaButtons}>
             <Link to="/auth?type=signup" className={styles.primaryButton}>Get Started</Link>
             <Link to="/auth?type=login" className={styles.secondaryButton}>Sign In</Link>
           </div>
+
+          )}
+
         </div>
         <div className={styles.heroIllustration}>
           <img 
