@@ -1,40 +1,40 @@
-
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 
-// Get user info from localStorage (adjust if you're using context)
+// Get user info
 const user = JSON.parse(localStorage.getItem('user'));
 const username = user?.name || 'Anonymous';
 
-// Connect to Socket.IO server
-const socket = io('http://localhost:3001');
+const socket = io('http://localhost:3001'); // Adjust if needed
 
 const LiveChat = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
+  const [socketId, setSocketId] = useState('');
 
   const handleToggle = () => setIsOpen(!isOpen);
 
   const handleSend = (e) => {
     if (e.key === 'Enter' && input.trim() !== '') {
-      const newMessage = input.trim();
-
-      // Send message with sender name
-      socket.emit('sendMessage', {
-        message: newMessage,
+      const newMessage = {
+        message: input.trim(),
         sender: username,
-      });
+        senderId: socket.id,
+      };
 
+      socket.emit('sendMessage', newMessage);
       setInput('');
     }
   };
 
   useEffect(() => {
-    // Receive messages from server
+    socket.on('connect', () => {
+      setSocketId(socket.id);
+    });
+
     socket.on('receiveMessage', (data) => {
-      const label = data.sender === username ? 'You' : data.sender;
-      setMessages((prev) => [...prev, `${label}: ${data.message}`]);
+      setMessages((prev) => [...prev, data]);
     });
 
     return () => {
@@ -102,7 +102,7 @@ const LiveChat = () => {
           >
             {messages.map((msg, i) => (
               <div key={i} style={{ marginBottom: '8px' }}>
-                {msg}
+                {msg.senderId === socketId ? 'You' : msg.sender}: {msg.message}
               </div>
             ))}
           </div>
