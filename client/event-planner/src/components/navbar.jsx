@@ -3,11 +3,20 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { authService } from '../services/api';
 import styles from './Navbar.module.css';
+import axios from 'axios';
+import { FaUserCircle } from 'react-icons/fa';
 
-const Navbar = () => {
+
+
+
+
+
+const Navbar = ({ setUser, user }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [token, setToken] = useState(null);
+  // const [user, setUser] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -17,8 +26,11 @@ const Navbar = () => {
     };
 
     // Check if user is logged in
-    const token = localStorage.getItem('token');
-    setIsLoggedIn(!!token);
+    const token1 = localStorage.getItem('token');
+    console.log("Token from local storage:", token1);
+    setIsLoggedIn(!!token1);
+    setToken(token1);
+    
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -27,6 +39,7 @@ const Navbar = () => {
   const handleLogout = () => {
     authService.logout();
     setIsLoggedIn(false);
+    setUser(null);
     navigate('/');
   };
 
@@ -34,7 +47,50 @@ const Navbar = () => {
     { path: '/', label: 'Home' },
     { path: '/events', label: 'Events' },
     { path: '/dashboard', label: 'Dashboard' },
+    { path: '/venues', label: 'Venues' },
+    { path: '/users', label: 'Other People' },
   ];
+
+  async function fetchUserData() {
+    try {
+        const response = await axios.get('http://localhost:3001/auth/getUser', {
+            headers: {
+                Authorization: `Bearer ${token}` 
+            }
+        });
+
+        console.log('User:', response.data.User);
+        return response.data.User; 
+    } catch (error) {
+        console.error('Error fetching user:', error.response?.data?.Error || error.message);
+        return null;
+    }
+}
+
+  useEffect(() => {
+    console.log("User token:", token);
+    
+    if (isLoggedIn) {
+      fetchUserData().then((userData) => {
+        if (userData) {
+          console.log('User data:', userData);  
+          setUser(userData);
+        }
+      });
+    }
+    if (user != null) {
+
+      console.log("Username :", user.username);
+    }
+}, [token]);
+
+useEffect(() => {
+    console.log("User data:", user);
+    if (user != null) {
+      console.log("Username :", user.username);
+    }
+} , [user]);
+
 
   return (
     <motion.nav
@@ -49,7 +105,7 @@ const Navbar = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            EventPlanner
+            TIME Is Managing Events
           </motion.span>
         </Link>
 
@@ -71,6 +127,20 @@ const Navbar = () => {
               </motion.span>
             </Link>
           ))}
+
+        <div className={styles.desktopNav}>
+          {user != null  && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}> 
+                      <FaUserCircle size={30} color="#2b5876" />
+                        <span>
+                          Hi {user.username} 
+                          </span>
+                      </div> 
+                    )  }
+
+        </div>
+
+
           <motion.div
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -85,6 +155,8 @@ const Navbar = () => {
               </Link>
             )}
           </motion.div>
+
+        
         </div>
 
         {/* Mobile Menu Button */}

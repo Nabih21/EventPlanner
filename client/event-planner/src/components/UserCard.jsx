@@ -1,15 +1,15 @@
-// src/components/EventCard.jsx
+// src/components/UserCard.jsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { FaCalendarAlt, FaMapMarkerAlt, FaArrowRight, FaCheckCircle } from "react-icons/fa";
+import { FaCalendarAlt, FaMapMarkerAlt, FaArrowRight } from "react-icons/fa";
 import styles from "../pages/LandingPage.module.css";
 
-const EventCard = ({ event, isRegistered = false }) => {
+const UserCard = ({ user }) => {
   const navigate = useNavigate();
 
   const handleCardClick = () => {
-    // Navigate to /event/:id
-    navigate(`/event/${event._id}`);
+    // Navigate to /user/:id
+    navigate(`/user/${user._id}`);
   };
 
   // Format date to a more readable format
@@ -34,32 +34,20 @@ const EventCard = ({ event, isRegistered = false }) => {
     }
   };
 
-  // Get status color
-  const getPromotionColor = (promoted) => {
-    if(promoted) {
-      return 'gold'; // Gold for promoted events
-    }
-  };
-
-  // Define the card style with an optional gold border if event.promotion is true
-  const cardStyle = {
-    cursor: 'pointer',
-    position: 'relative',
-    overflow: 'hidden',
-    display: 'flex',
-    flexDirection: 'row',
-    height: '100%',
-    width: '100%',
-    marginBottom: '0',
-    borderRadius: '10px',
-    border: '4px solid #2b5876' 
-  };
-
   return (
-    <div 
+    <div
       onClick={handleCardClick}
       className={styles.eventCard}
-      style={cardStyle}
+      style={{ 
+        cursor: 'pointer',
+        position: 'relative',
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'row',
+        height: '100%',
+        width: '100%',
+        marginBottom: '0'
+      }}
     >
       <div style={{ 
         position: 'relative',
@@ -69,10 +57,10 @@ const EventCard = ({ event, isRegistered = false }) => {
         overflow: 'hidden',
         borderRadius: '10px 0 0 10px'
       }}>
-        {/* You can replace this placeholder with a real image URL if your event has one */}
+        {/* You can replace this placeholder with a real image URL if your user pfp has one */}
         <img
-          src= {event.picture}
-          alt={event.name}
+          src= {user.profilePicture}
+          alt={user.username}
           style={{ 
             width: '100%', 
             height: '100%', 
@@ -96,45 +84,6 @@ const EventCard = ({ event, isRegistered = false }) => {
         }}>
           {event.status || 'Unknown'}
         </div>
-
-        
-        {isRegistered && (
-          <div style={{
-            position: 'absolute',
-            bottom: '10px',
-            right: '10px',
-            backgroundColor: 'rgba(76, 175, 80, 0.9)',
-            color: 'white',
-            padding: '5px 10px',
-            borderRadius: '20px',
-            fontSize: '0.8rem',
-            fontWeight: 'bold',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '5px',
-            boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
-          }}>
-            <FaCheckCircle /> Registered
-          </div>
-        )}
-
-
-        {event.promoted &&
-        <div style={{
-          position: 'absolute',
-          top: '10px',
-          left: '10px',
-          backgroundColor: '#D4AF37',
-          color: 'white',
-          padding: '5px 10px',
-          borderRadius: '20px',
-          fontSize: '0.8rem',
-          fontWeight: 'bold',
-          boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
-        }}>
-          Sponsored
-        </div>}
-
       </div>
       
       <div style={{ 
@@ -153,24 +102,17 @@ const EventCard = ({ event, isRegistered = false }) => {
             fontWeight: '700',
             color: '#2d3748'
           }}>
-            {event.name}
+            {user.username}
           </h3>
           
           <div style={{ marginBottom: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
               <FaMapMarkerAlt style={{ color: '#2b5876', marginRight: '0.5rem' }} />
-              <span style={{ color: '#718096' }}>{event.location}</span>
-            </div>
-            
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <FaCalendarAlt style={{ color: '#2b5876', marginRight: '0.5rem' }} />
-              <span style={{ color: '#718096' }}>
-                {formatDate(event.start_date)} - {formatDate(event.end_date)}
-              </span>
+              <span style={{ color: '#718096' }}>{user.currentCity}</span>
             </div>
           </div>
           
-          {event.description && (
+          {user.personalDescription && (
             <p style={{ 
               color: '#718096', 
               marginBottom: '1.5rem',
@@ -181,7 +123,7 @@ const EventCard = ({ event, isRegistered = false }) => {
               WebkitBoxOrient: 'vertical',
               lineHeight: '1.6'
             }}>
-              {event.description}
+              {user.personalDescription}
             </p>
           )}
         </div>
@@ -201,7 +143,7 @@ const EventCard = ({ event, isRegistered = false }) => {
               gap: '0.5rem'
             }}
           >
-            View Details <FaArrowRight />
+            View User <FaArrowRight />
           </button>
         </div>
       </div>
@@ -209,4 +151,4 @@ const EventCard = ({ event, isRegistered = false }) => {
   );
 };
 
-export default EventCard;
+export default UserCard;

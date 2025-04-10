@@ -1,4 +1,3 @@
-
 import express from 'express';
 import { FriendsModel } from '../models/Friends.js';
 import { getUserFromJwtToken } from '../middleware/auth.js';
@@ -80,4 +79,4 @@ router.patch('/accept/:id', getUserFromJwtToken, async (req, res) => {
 });
 
 
-export { router as friendsRouter };
+export {router as friendsRouter};

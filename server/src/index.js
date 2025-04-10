@@ -141,9 +141,13 @@ config();
 
 // Routes
 import { usersRouter } from './routes/users.js';
+import { ticketsRouter } from './routes/tickets.js';
+
 import { eventsRouter } from './routes/events.js';
 import { venuesRouter } from './routes/venues.js';
 import { ticketsRouter } from './routes/tickets.js';
+import { friendsRouter } from './routes/friends.js';
+
 import { friendsRouter } from './routes/friends.js';
 
 const app = express();
@@ -192,6 +196,8 @@ app.get('/test', (req, res) => {
   res.send("Test route works");
 });
 
+console.log("✅ Registering /auth routes");
+
 // DB
 mongoose.connect(
   `mongodb+srv://eventPlannerTeam:${mongoPass}@eventplanner.eujck.mongodb.net/eventplanner?retryWrites=true&w=majority&appName=eventplanner`
@@ -200,7 +206,7 @@ mongoose.connect(
 mongoose.connection.on('connected', () => {
   console.log('✅ Connected to MongoDB');
 });
-
+ 
 mongoose.connection.on('error', (err) => {
   console.error('❌ MongoDB connection error:', err);
 });

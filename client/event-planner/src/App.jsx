@@ -1,11 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Navbar from './components/Navbar';
+import React, {useEffect, useState} from 'react';
+import {BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Navbar from './components/navbar';
+
+
 import LandingPage from './pages/LandingPage';
 import Auth from './pages/Auth';
+import Users from './pages/Users';
+import UserDetails from './pages/UserDetails';
 import Events from './pages/Events';
 import Venues from './pages/Venues';
 import EventDetails from './pages/EventDetails';
+import Dashboard from './pages/dashboard';
+import CreateEvent from './pages/CreateEvent';
+
 import './App.css';
 import LiveChat from './components/LiveChat';
 
@@ -29,14 +36,17 @@ function App() {
           <Route path="/auth" element={<Auth />} />
           <Route path="/events" element={<Events />} />
           <Route path="/venues" element={<Venues />} />
+          <Route path="/users" element={<Users />} />
           <Route path="/event/:id" element={<EventDetails />} />
+          <Route path="/user/:id" element={<UserDetails />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/create-event" element={<CreateEvent />} /> 
         </Routes>
       </div>
     </Router>
     {isLogin && <LiveChat/>}
     </>
 
-    
   );
 }
 
