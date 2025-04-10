@@ -39,6 +39,24 @@ const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);
   const navigate = useNavigate();
 
+  // Handle accepting friend requests
+  const handleAcceptFriendRequest = async (requestId) => {
+    try {
+      const response = await api.patch(`/friends/acceptRequest/${requestId}`);
+      if (response.data) {
+        // Update friends and friend requests lists
+        setFriendRequests(prev => prev.filter(req => req._id !== requestId));
+        // Fetch updated friends list
+        const friendsResponse = await api.get('/friends/viewFriends');
+        if (friendsResponse.data && friendsResponse.data.Friends) {
+          setFriends(friendsResponse.data.Friends);
+        }
+      }
+    } catch (err) {
+      console.error('Error accepting friend request:', err);
+    }
+  };
+
   // Check if user is logged in
   const token = localStorage.getItem('token');
   const userID = localStorage.getItem('userID');

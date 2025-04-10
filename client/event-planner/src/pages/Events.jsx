@@ -8,18 +8,38 @@ import styles from "./LandingPage.module.css";
 
 const Events = () => {
   const [events, setEvents] = useState([]);
+  const [userTickets, setUserTickets] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Fetch all events from your backend
-    const fetchEvents = async () => {
+    // Fetch all events and user tickets
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("http://localhost:3001/manage/viewEvents");
-        setEvents(response.data.Events || []);
+        
+        // Fetch all events
+        const eventsResponse = await axios.get("http://localhost:3001/manage/viewEvents");
+        setEvents(eventsResponse.data.Events || []);
+        
+        // Check if user is logged in and fetch their tickets
+        const token = localStorage.getItem('token');
+        if (token) {
+          try {
+            const ticketsResponse = await axios.get("http://localhost:3001/tickets/viewTickets", {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+            setUserTickets(ticketsResponse.data.Tickets || []);
+          } catch (ticketError) {
+            console.error("Error fetching user tickets:", ticketError);
+            // Don't set main error for ticket fetch issues
+          }
+        }
+        
         setError(null);
       } catch (error) {
         console.error("Error fetching events:", error);
@@ -29,7 +49,7 @@ const Events = () => {
       }
     };
 
-    fetchEvents();
+    fetchData();
   }, []);
 
   // Filter the events by search term and status
@@ -162,17 +182,22 @@ const Events = () => {
               width: '100%'
             }}
           >
-            {filteredEvents.map((event) => (
-              <motion.div
-                key={event._id}
-                variants={itemVariants}
-                whileHover={{ y: -5, boxShadow: "0 20px 40px rgba(0, 0, 0, 0.1)" }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                style={{ width: '100%' }}
-              >
-                <EventCard event={event} />
-              </motion.div>
-            ))}
+            {filteredEvents.map((event) => {
+              // Check if user is registered for this event
+              const isRegistered = userTickets.some(ticket => ticket.EventID === event._id);
+              
+              return (
+                <motion.div
+                  key={event._id}
+                  variants={itemVariants}
+                  whileHover={{ y: -5, boxShadow: "0 20px 40px rgba(0, 0, 0, 0.1)" }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  style={{ width: '100%' }}
+                >
+                  <EventCard event={event} isRegistered={isRegistered} />
+                </motion.div>
+              );
+            })}
           </motion.div>
         )}
       </div>
