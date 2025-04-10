@@ -28,8 +28,7 @@ export const authService = {
     const { username, password, role } = credentials;
     const response = await api.post('/auth/login', { 
       username,
-      password,
-      role
+      password
     });
     return response.data;
   },
@@ -95,7 +94,7 @@ export const ticketService = {
   },
 
   getTickets: async () => {
-    const response = await api.get('/manage/viewTickets');
+    const response = await api.get(`/manage/viewEventAttendees/${id}`);
     return response.data;
   },
 
