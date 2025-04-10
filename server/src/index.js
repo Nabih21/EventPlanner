@@ -2,8 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import { mongoPass } from '../secrets.js';
-import { config } from 'dotenv';
-config();
+
 import { usersRouter } from './routes/users.js';
 import { eventsRouter } from './routes/events.js';
 import { venuesRouter } from './routes/venues.js';

@@ -46,7 +46,7 @@ const eventSchema = new mongoose.Schema({
     attendees: [{
         username: String,
         role: {
-            type: String,
+            type: [String],
             enum: ['organizer', 'stakeholder', 'speaker', 'attendee']
         }
       }]
