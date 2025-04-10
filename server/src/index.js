@@ -18,6 +18,7 @@ app.use(express.json());
 app.use(cors());
 
 app.use('/tickets', ticketsRouter);
+console.log("✅ Registering /auth routes");
 app.use('/auth', usersRouter);
 app.use('/manage', eventsRouter);
 app.use('/venues', venuesRouter);
@@ -26,6 +27,11 @@ app.use('/friends', friendsRouter);
 
 mongoose.connect(`mongodb+srv://eventPlannerTeam:${mongoPass}@eventplanner.eujck.mongodb.net/eventplanner?retryWrites=true&w=majority&appName=eventplanner`);
 
+app.get('/test', (req, res) => {
+    console.log("✅ /test route hit");
+    res.send("Test route works");
+  });
+  
 app.listen(3001, () => console.log('Server started on port 3001'));
 
 
