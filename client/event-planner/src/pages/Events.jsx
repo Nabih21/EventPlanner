@@ -20,6 +20,7 @@ const Events = () => {
         setLoading(true);
         const response = await axios.get("http://localhost:3001/manage/viewEvents");
         setEvents(response.data.Events || []);
+        console.log(response.data.Events)
         setError(null);
       } catch (error) {
         console.error("Error fetching events:", error);

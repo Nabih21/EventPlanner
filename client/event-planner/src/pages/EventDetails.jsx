@@ -211,7 +211,7 @@ const EventDetails = () => {
       <div className={styles.hero} style={{ 
         minHeight: "50vh", 
         padding: "2rem 5%",
-        background: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(https://source.unsplash.com/random/1600x900/?${event.name.replace(/\s+/g, ',')})`,
+        background: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${event.picture}${event.name.replace(/\s+/g, ',')})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         color: 'white',

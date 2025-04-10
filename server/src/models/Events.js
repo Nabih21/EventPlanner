@@ -39,17 +39,10 @@ const eventSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    promotion: [{
-        promotion_end: Date,
-        promotion_cost_total: Number
-    }],
-    attendees: [{
-        username: String,
-        role: {
-            type: String,
-            enum: ['organizer', 'stakeholder', 'speaker', 'attendee']
-        }
-      }]
+    picture: {
+        type: String,
+        default: "https://static.thenounproject.com/png/4595376-200.png"
+    }
 });
 
 export const EventModel = mongoose.model('event', eventSchema);
