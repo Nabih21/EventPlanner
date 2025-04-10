@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FaSearch, FaFilter, FaCalendarAlt, FaMapMarkerAlt, FaSpinner } from "react-icons/fa";
 import EventCard from "../components/EventCard";
 import styles from "./LandingPage.module.css";
+import api from "../services/api"; 
 
 const Events = () => {
   const [events, setEvents] = useState([]);
@@ -26,13 +27,13 @@ const Events = () => {
         
         // Check if user is logged in and fetch their tickets
         const token = localStorage.getItem('token');
+        console.log("Token:", token);
+        console.log("User ID:", localStorage.getItem('userID'));
         if (token) {
           try {
-            const ticketsResponse = await axios.get("http://localhost:3001/tickets/viewTickets", {
-              headers: {
-                Authorization: `Bearer ${token}`
-              }
-            });
+            const ticketsResponse = await api.get("http://localhost:3001/auth/viewTickets");
+
+            console.log("Tickets Response:", ticketsResponse.data);
             setUserTickets(ticketsResponse.data.Tickets || []);
           } catch (ticketError) {
             console.error("Error fetching user tickets:", ticketError);
@@ -184,6 +185,8 @@ const Events = () => {
           >
             {filteredEvents.map((event) => {
               // Check if user is registered for this event
+              console.log("User Tickets:", userTickets);
+              console.log("Event ID:", event._id);
               const isRegistered = userTickets.some(ticket => ticket.EventID === event._id);
               
               return (

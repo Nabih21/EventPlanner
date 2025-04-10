@@ -19,6 +19,7 @@ import {
   FaTimes
 } from "react-icons/fa";
 import styles from "./LandingPage.module.css";
+import api from "../services/api"; // Import your API service
 
 const EventDetails = () => {
   const { id } = useParams();
@@ -84,11 +85,7 @@ const EventDetails = () => {
         if (!token) return;
         
         // Use the API service instead of direct axios call for consistency
-        const response = await axios.get('http://localhost:3001/tickets/viewTickets', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+        const response = await api.get("/auth/viewTickets");
         
         if (response.data?.Tickets && response.data.Tickets.length > 0) {
           // Compare using string equality since IDs might be in different formats
@@ -109,7 +106,6 @@ const EventDetails = () => {
         }
       } catch (error) {
         console.error('Error checking registration:', error);
-        // Don't reset isRegistered here, as it could be a network error
       }
     };
 
