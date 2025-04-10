@@ -1,0 +1,351 @@
+/* Venues Page Styling - Matching Dashboard */
+
+:root {
+    --primary-color: #4f46e5;
+    --primary-light: rgba(79, 70, 229, 0.1);
+    --primary-hover: #4338ca;
+    --secondary-color: #10b981;
+    --secondary-light: rgba(16, 185, 129, 0.1);
+    --secondary-hover: #059669;
+    --danger-color: #ef4444;
+    --danger-light: rgba(239, 68, 68, 0.1);
+    --warning-color: #f59e0b;
+    --warning-light: rgba(245, 158, 11, 0.1);
+    --info-color: #0ea5e9;
+    --info-light: rgba(14, 165, 233, 0.1);
+    --success-color: #22c55e;
+    --success-light: rgba(34, 197, 94, 0.1);
+    --text-primary: #1f2937;
+    --text-secondary: #4b5563;
+    --text-tertiary: #6b7280;
+    --text-light: #9ca3af;
+    --border-color: #e5e7eb;
+    --background-color: #f9fafb;
+    --card-background: #ffffff;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --radius-sm: 0.25rem;
+    --radius: 0.5rem;
+    --radius-md: 0.75rem;
+    --radius-lg: 1rem;
+    --radius-full: 9999px;
+  }
+  
+  .venuesContainer {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+  
+  .title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+  }
+  
+  .subtitle {
+    color: var(--text-tertiary);
+    margin-top: 0.5rem;
+    font-size: 1.125rem;
+  }
+  
+  .searchBar {
+    display: flex;
+    align-items: center; /* Vertically center icon and input */
+    background-color: var(--card-background);
+    border-radius: var(--radius);
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow);
+    gap: 0.75rem; /* Increased gap slightly */
+  }
+  
+  .searchInput {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    color: var(--text-primary);
+    background: transparent; /* Ensure input bg is transparent */
+  }
+  
+  /* Removed .searchIcon as it's not used - FaSearch has inline style */
+  
+  .filterContainer {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  
+  .filterItem {
+    display: inline-flex; /* Align icon and text */
+    align-items: center; /* Vertically center icon and text */
+    gap: 0.5rem; /* Add gap between icon and text */
+    padding: 0.5rem 1rem;
+    background-color: var(--card-background);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .filterItem:hover, .filterItem.active {
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+  }
+  
+  .venuesGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .venueCard {
+    background-color: var(--card-background);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: 100%; /* Ensure cards fill height if needed */
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .venueCard:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .venueImageContainer {
+    height: 150px;
+    background-color: var(--primary-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  
+  /* .venueIcon class was defined but not used in the component */
+  /* .venueIcon {
+    font-size: 3rem;
+    color: var(--primary-color);
+  } */
+  
+  .venueContent {
+    padding: 1.5rem;
+    flex: 1; /* Allow content to grow and push footer down */
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .venueHeader {
+    margin-bottom: 1rem;
+  }
+  
+  .venueName {
+    margin: 0 0 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.4; /* Prevent overlap if name is long */
+  }
+  
+  .venueType {
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
+    display: inline-block;
+  }
+  
+  .venueDetails {
+    flex-grow: 1; /* Allow details section to take available space */
+    margin-bottom: 1.5rem; /* Space before the footer/button */
+  }
+  
+  .venueDetail {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    color: var(--text-secondary);
+    font-size: 0.9375rem;
+  }
+  
+  .detailIcon {
+    color: var(--primary-color);
+    font-size: 1rem;
+    flex-shrink: 0; /* Prevent icon from shrinking */
+  }
+  
+  .venueFooter {
+    margin-top: auto; /* Push footer to the bottom */
+  }
+  
+  .viewButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 0.75rem;
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+    font-weight: 500;
+    font-size: 0.9375rem;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    text-align: center;
+  }
+  
+  .viewButton:hover {
+    background-color: var(--primary-color);
+    color: white;
+  }
+  
+  .loadingContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 50vh; /* Use min-height */
+    padding: 2rem; /* Add some padding */
+  }
+  
+  .loader {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border-color);
+    border-radius: 50%;
+    border-top-color: var(--primary-color);
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+  }
+  
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .loadingText {
+    color: var(--text-tertiary);
+    font-size: 1.125rem;
+  }
+  
+  .errorContainer {
+    text-align: center;
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    background-color: var(--danger-light);
+    color: var(--danger-color);
+    margin: 2rem 0;
+    border: 1px solid var(--danger-color); /* Add border for emphasis */
+  }
+  
+  .retryButton {
+    margin-top: 1rem;
+    padding: 0.75rem 1.5rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s ease; /* Add transition */
+  }
+  
+  .retryButton:hover {
+      background-color: var(--primary-hover);
+  }
+  
+  
+  .emptyState {
+    text-align: center;
+    padding: 3rem 1rem;
+    margin-top: 2rem; /* Add margin */
+    background-color: var(--card-background); /* Optional: add background */
+    border-radius: var(--radius-lg); /* Optional: add radius */
+    box-shadow: var(--shadow-sm); /* Optional: add subtle shadow */
+  }
+  
+  .emptyStateIcon {
+    font-size: 3rem;
+    color: var(--text-light);
+    margin-bottom: 1rem;
+  }
+  
+  .emptyStateText {
+    color: var(--text-tertiary);
+    font-size: 1.125rem;
+    margin-bottom: 0; /* Adjusted margin */
+  }
+  
+  /* Responsive styles */
+  @media (max-width: 768px) {
+    .venuesContainer {
+      padding: 0 1rem; /* Adjust padding */
+    }
+    .header {
+      flex-direction: column;
+      align-items: flex-start;
+      text-align: left; /* Ensure text aligns left */
+    }
+    .title {
+      font-size: 1.5rem; /* Adjust title size */
+    }
+    .subtitle {
+      font-size: 1rem; /* Adjust subtitle size */
+    }
+    .venuesGrid {
+      /* Adjust grid for smaller screens if needed, 250px might be too small */
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+    }
+    .venueCard {
+       border-radius: var(--radius-md); /* Slightly smaller radius */
+    }
+    .venueContent {
+      padding: 1rem; /* Adjust padding */
+    }
+    .venueName {
+      font-size: 1.125rem; /* Adjust font size */
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .venuesGrid {
+      /* Stack cards on very small screens */
+      grid-template-columns: 1fr; 
+    }
+    .filterContainer {
+      gap: 0.5rem; /* Reduce gap */
+    }
+    .filterItem {
+      padding: 0.4rem 0.8rem; /* Adjust padding */
+      font-size: 0.8rem; /* Adjust font size */
+    }
+    .searchBar {
+      padding: 0.5rem 0.75rem;
+    }
+    .searchInput {
+      font-size: 0.9rem;
+    }
+  }
