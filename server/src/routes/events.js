@@ -82,30 +82,14 @@ router.patch('/promoteEvent/:_id', getUserFromJwtToken, async (req, res) => {
           });
      }
      
-     console.log(Event.promotion)
-     let newpromotion = Event.promotion
-     if (typeof newpromotion === 'undefined'){
-        newpromotion = []
-     }
-
-     const current_date = new Date()
-     const promotion_end = current_date.setDate(current_date.getDate() + 5);
-     const addedpromotion = {
-         promotion_end: promotion_end,
-         promotion_cost_total: 0
-     }
- 
-     newpromotion.push(addedpromotion)
-     console.log(newpromotion)
 
 
      const update = await EventModel.findOneAndUpdate({ _id: _id }, 
-         { promoted: true, promotion: newpromotion})  
+         { promoted: true})  
  
  
      return res.status(200).json({ 
-         message: 'Event Promoted successfully',
-         Event
+         message: 'Event Promoted successfully'
       });
 
 });

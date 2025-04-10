@@ -38,18 +38,7 @@ const eventSchema = new mongoose.Schema({
     promoted: {
         type: Boolean,
         default: false
-    },
-    promotion: [{
-        promotion_end: Date,
-        promotion_cost_total: Number
-    }],
-    attendees: [{
-        username: String,
-        role: {
-            type: String,
-            enum: ['organizer', 'stakeholder', 'speaker', 'attendee']
-        }
-      }]
+    }
 });
 
 export const EventModel = mongoose.model('event', eventSchema);
