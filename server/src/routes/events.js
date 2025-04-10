@@ -179,20 +179,32 @@ router.patch('/getTicket/:id', getUserFromJwtToken, async (req, res) => {
 
       
 router.get('/viewEvent/:id', async (req, res) => {
-
-    const {id} =req.params
-    let Event
-    try{
-    Event = await EventModel.findById(id) // maybe add a check to see if event view field(yet to be added) is type public
-    }
-    catch(error) {
+    const id = req.params.id;
+    
+    if (!id) {
         return res.status(400).json({ 
-            Error: "id provided is invalid"
+            Error: "No event ID provided"
          });
     }
+    
+    let Event;
+    try{
+        Event = await EventModel.findById(id)
+            .populate({
+                path: 'resources',
+                model: 'resource'  // Changed from 'Resource' to 'resource' to match model definition
+            });
+    }
+    catch(error) {
+        console.error("Error fetching event:", error);
+        return res.status(400).json({ 
+            Error: "Invalid event ID format"
+         });
+    }
+    
     if(!Event){
         return res.status(400).json({ 
-            Error: 'No Event with such ID'
+            Error: 'No Event found with the specified ID'
          });
     }
 

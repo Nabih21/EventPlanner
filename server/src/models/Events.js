@@ -27,10 +27,10 @@ const eventSchema = new mongoose.Schema({
         required: true,
         default: 'planned'
     },
-    resources: {
-        type: Array,
-        default: null
-    },
+    resources: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Resource'
+    }],
     venues: {
         type: Array,
         default: null
