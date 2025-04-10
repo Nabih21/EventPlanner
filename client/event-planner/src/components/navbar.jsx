@@ -38,6 +38,47 @@ const Navbar = () => {
     { path: '/users', label: 'Other People' },
   ];
 
+  async function fetchUserData() {
+    try {
+        const response = await axios.get('http://localhost:3001/auth/getUser', {
+            headers: {
+                Authorization: `Bearer ${token}` 
+            }
+        });
+
+        console.log('User:', response.data.User);
+        return response.data.User; 
+    } catch (error) {
+        console.error('Error fetching user:', error.response?.data?.Error || error.message);
+        return null;
+    }
+}
+
+  useEffect(() => {
+    console.log("User token:", token);
+    
+    if (isLoggedIn) {
+      fetchUserData().then((userData) => {
+        if (userData) {
+          console.log('User data:', userData);  
+          setUser(userData);
+        }
+      });
+    }
+    if (user != null) {
+
+      console.log("Username :", user.username);
+    }
+}, [token]);
+
+useEffect(() => {
+    console.log("User data:", user);
+    if (user != null) {
+      console.log("Username :", user.username);
+    }
+} , [user]);
+
+
   return (
     <motion.nav
       className={`${styles.navbar} ${isScrolled ? styles.scrolled : ''}`}
