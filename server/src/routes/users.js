@@ -5,6 +5,7 @@ import { UserModel } from '../models/Users.js';
 // Services
 import { generateToken, verifyToken } from '../service/jwt.js';
 import { hashPassword, verifyPassword } from '../service/password.js';
+import { getUserFromJwtToken } from '../middleware/auth.js';
 
 
 const router = express.Router();
@@ -51,5 +52,24 @@ router.post('/login', async (req, res) => {
 
 });
 
+router.get('/me', getUserFromJwtToken, async (req, res) => {
+    try {
+        const user = await UserModel.findById(req.user.userID);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        
+        // Return user data without password
+        const userData = {
+            _id: user._id,
+            username: user.username
+        };
+        
+        return res.status(200).json(userData);
+    } catch (error) {
+        console.error('Error fetching user:', error);
+        return res.status(500).json({ message: 'Server error' });
+    }
+});
 
 export { router as usersRouter };

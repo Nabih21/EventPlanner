@@ -299,5 +299,84 @@ router.patch('/inviteToEvent/:id', getUserFromJwtToken, async (req, res) => {
 
 });
 
+router.get('/my-events', getUserFromJwtToken, async (req, res) => {
+    try {
+        // Find events where the current user is an attendee
+        const events = await EventModel.find({
+            'attendees.username': req.user.username
+        });
+        
+        return res.status(200).json(events);
+    } catch (error) {
+        console.error('Error fetching user events:', error);
+        return res.status(500).json({ message: 'Server error' });
+    }
+});
+
+router.put('/events/:id', getUserFromJwtToken, async (req, res) => {
+    const { id } = req.params;
+    const { name, location, description, start_date, end_date, status, venues } = req.body;
+
+    try {
+        const event = await EventModel.findById(id);
+        if (!event) {
+            return res.status(404).json({ Error: 'No Event with such ID' });
+        }
+
+        // Check if the user is the organizer
+        const isOrganizer = event.attendees.some(att => att.username === req.user.username && att.role === 'organizer');
+        if (!isOrganizer) {
+            return res.status(403).json({ Error: 'Only the organizer can update the event' });
+        }
+
+        // Update the event
+        event.name = name || event.name;
+        event.location = location || event.location;
+        event.description = description || event.description;
+        event.start_date = start_date || event.start_date;
+        event.end_date = end_date || event.end_date;
+        event.status = status || event.status;
+        event.venues = venues || event.venues;
+
+        await event.save();
+
+        return res.status(200).json({ message: 'Event updated successfully', Event: event });
+
+    } catch (error) {
+        console.error("Error updating event:", error);
+        if (error.kind === 'ObjectId') {
+            return res.status(400).json({ Error: 'Invalid event ID format' });
+        }
+        return res.status(500).json({ Error: 'Server error while updating event' });
+    }
+});
+
+
+router.delete('/events/:id', getUserFromJwtToken, async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const event = await EventModel.findById(id);
+        if (!event) {
+            return res.status(404).json({ Error: 'No Event with such ID' });
+        }
+
+        // Check if the user is the organizer
+        const isOrganizer = event.attendees.some(att => att.username === req.user.username && att.role === 'organizer');
+        if (!isOrganizer) {
+            return res.status(403).json({ Error: 'Only the organizer can delete the event' });
+        }
+
+        await EventModel.findByIdAndDelete(id);
+        return res.status(200).json({ message: 'Event deleted successfully' });
+
+    } catch (error) {
+        console.error("Error deleting event:", error);
+        if (error.kind === 'ObjectId') {
+            return res.status(400).json({ Error: 'Invalid event ID format' });
+        }
+        return res.status(500).json({ Error: 'Server error while deleting event' });
+    }
+});
 
 export {router as eventsRouter};
